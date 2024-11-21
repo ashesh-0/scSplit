@@ -90,7 +90,7 @@
             
         },
         "lr_scheduler": {
-            "patience": 1
+            "patience": 100
             // "step_start_ema": 5000,
             // "update_ema_every": 1,
             // "ema_decay": 0.9999

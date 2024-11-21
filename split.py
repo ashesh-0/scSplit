@@ -43,7 +43,8 @@ def get_datasets(opt, tiled_pred=False):
         train_fpath = os.path.join(rootdir, 'train.txt')
         val_fpath = os.path.join(rootdir, 'val.txt')
         datapath = os.path.join(rootdir, 'RRWDatasets')
-        nimgs = 2000
+        
+        nimgs = opt['datasets']['max_images']
         train_set = RRWDataset(datapath, train_fpath, crop_size=patch_size, fix_sample_A=nimgs, regular_aug=True)
         val_set = RRWDataset(datapath, val_fpath, crop_size=patch_size, fix_sample_A=nimgs, regular_aug=False)
         return train_set, val_set
@@ -75,10 +76,10 @@ def get_datasets(opt, tiled_pred=False):
         val_set = class_obj(data_type, val_data_location, patch_size, target_channel_idx=target_channel_idx,
                             normalization_dict=train_set.get_normalization_dict(),
                             max_qval=max_qval,
-                                upper_clip=upper_clip,
-                                channel_weights=channel_weights,
+                            upper_clip=upper_clip,
+                            channel_weights=channel_weights,
                             enable_transforms=False,
-                                                        random_patching=False, input_from_normalized_target=input_from_normalized_target)
+                            random_patching=False, input_from_normalized_target=input_from_normalized_target)
         return train_set, val_set
 
 
@@ -250,6 +251,9 @@ if __name__ == "__main__":
 
 
                     avg_psnr = np.mean([np.mean(psnr_values[ch_idx]) for ch_idx in psnr_values.keys()])
+                    # apply lr_scheduler here. 
+                    diffusion.scheduler.step(avg_psnr)
+                    
                     diffusion.set_new_noise_schedule(
                         opt['model']['beta_schedule']['train'], schedule_phase='train')
                     # log

@@ -59,6 +59,7 @@ class my_dataset_wTxt(Dataset):
         len_imgs_in_A = len(self.imgs_in_A)
         self.length = len_imgs_in_A
         self.crop_size = crop_size
+        print(f'{self.__class__.__name__} dataset created with {len_imgs_in_A} images, cropsize={crop_size}')
 
     def __getitem__(self, index):
         data_IN_A, data_GT_A, _ = self.read_imgs_pair(self.imgs_in_A[index], self.imgs_gt_A[index],
@@ -203,8 +204,8 @@ class DatasetForInference(Dataset):
 import bisect
 import warnings
 
-from torch._utils import _accumulate
-from torch import randperm
+# from torch._utils import _accumulate
+# from torch import randperm
 
 
 class ConcatDataset(Dataset):

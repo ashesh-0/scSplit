@@ -19,6 +19,7 @@
         // "max_qval": 0.995,
         // "channel_weights": [1.0, 1.0],
         "datapath": "/group/jug/ashesh/data/RRW/combined/",
+        "max_images": 2000,
         "train": {
             "name": "RRW",
             "datatype": "img", //lmdb or img, path of img files
@@ -88,10 +89,11 @@
             "lr": 1e-3
             
         },
-        "ema_scheduler": { // not used now
-            "step_start_ema": 5000,
-            "update_ema_every": 1,
-            "ema_decay": 0.9999
+        "lr_scheduler": {
+            "patience": 1
+            // "step_start_ema": 5000,
+            // "update_ema_every": 1,
+            // "ema_decay": 0.9999
         }
     },
     "wandb": {

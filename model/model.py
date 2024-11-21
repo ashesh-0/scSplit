@@ -36,8 +36,19 @@ class DDPM(BaseModel):
             else:
                 optim_params = list(self.netG.parameters())
 
-            self.optG = torch.optim.Adam(
-                optim_params, lr=opt['train']["optimizer"]["lr"])
+            if opt['train']['optimizer']['type'] == 'adam':
+                self.optG = torch.optim.Adam(optim_params, lr=opt['train']["optimizer"]["lr"])
+            elif opt['train']['optimizer']['type'] == 'adamax':
+                self.optG = torch.optim.Adamax(optim_params, lr=opt['train']["optimizer"]["lr"], weight_decay=0)
+            
+            # set scheduler on PSNR, and therefore, it is max.
+            self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optG,
+                                                         'max',
+                                                         patience=opt['train']['lr_scheduler']['patience'],
+                                                         factor=0.5,
+                                                         min_lr=1e-12,
+                                                         verbose=True)
+            print('Scheduler set to ReduceLROnPlateau with patience: ', opt['train']['lr_scheduler']['patience'])
             self.log_dict = OrderedDict()
         self.load_network()
         # self.print_network()

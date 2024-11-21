@@ -14,43 +14,34 @@
         // "resume_state": "experiments/distributed_high_sr_ffhq_210901_121212/checkpoint/I830000_E32" //pretrain model or training state
     },
     "datasets": {
-        "upper_clip": false,
+        // "upper_clip": false,
         "patch_size": 512,
-        "max_qval": 0.995,
+        // "max_qval": 0.995,
         // "channel_weights": [1.0, 1.0],
+        "datapath": "/group/jug/ashesh/data/RRW/combined/",
+        "max_images": 2000,
         "train": {
-            "name": "Hagen",
-            "datapath": {
-                "ch0": "/group/jug/ashesh/data/diffsplit_hagen/train/train_actin-60x-noise2-highsnr.tif",
-                "ch1": "/group/jug/ashesh/data/diffsplit_hagen/train/train_mito-60x-noise2-highsnr.tif"
-            },
+            "name": "RRW",
             "datatype": "img", //lmdb or img, path of img files
-            "batch_size": 4,
-            "num_workers": 2,
-            "use_shuffle": true,
-            "uncorrelated_channels": false
+            "batch_size": 8,
+            "num_workers": 6
         },
         "val": {
-            "name": "Hagen",
-            // "target_channel_idx": 0, // If set then we do image translation from input to this channel 
-            "datapath": {
-                "ch0": "/group/jug/ashesh/data/diffsplit_hagen/val/val_actin-60x-noise2-highsnr.tif",
-                "ch1": "/group/jug/ashesh/data/diffsplit_hagen/val/val_mito-60x-noise2-highsnr.tif"
-            },
+            "name": "RRW",
+            // "target_channel_idx": 0, // If set then we do image translation from input to this channel           
             "patch_size": 512,
             "datatype": "img" //lmdb or img, path of img files
         }
     },
     "model": {
-        "which_model_G": "joint_indi", // use the ddpm or sr3 network structure
+        "which_model_G": "indi", // use the ddpm or sr3 network structure
         "loss_type": "l1", // TODO: this is not used now, but will be used in future to test mutliple loss functions
         "w_input_loss": 0.1,
         "lr_reduction": "mean",
         "finetune_norm": false,
-        "allow_full_translation": true,
         "unet": {
-            "in_channel": 1, // target channel + input channel. it is so because the noise of the shape target is concatenated with the input
-            "out_channel": 1,
+            "in_channel": 3, // target channel + input channel. it is so because the noise of the shape target is concatenated with the input
+            "out_channel": 3,
             "inner_channel": 16,
             "norm_groups": 16,
             "channel_multiplier": [
@@ -84,24 +75,25 @@
         },
         "diffusion": {
             "image_size": 32,
-            "channels": 1, //sample channel
+            "channels": 3, //sample channel
             "conditional": false // unconditional generation or unconditional generation(super_resolution)
         }
     },
     "train": {
         "n_iter": 1000000,
-        "val_freq": 1e4,
-        "save_checkpoint_freq": 1e4,
-        "print_freq": 50,
+        "val_freq": 1e3,
+        "save_checkpoint_freq": 1e3,
+        "print_freq": 500,
         "optimizer": {
-            "type": "adam",
+            "type": "adamax",
             "lr": 1e-3
             
         },
-        "ema_scheduler": { // not used now
-            "step_start_ema": 5000,
-            "update_ema_every": 1,
-            "ema_decay": 0.9999
+        "lr_scheduler": {
+            "patience": 100
+            // "step_start_ema": 5000,
+            // "update_ema_every": 1,
+            // "ema_decay": 0.9999
         }
     },
     "wandb": {

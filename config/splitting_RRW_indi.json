@@ -23,7 +23,7 @@
         "train": {
             "name": "RRW",
             "datatype": "img", //lmdb or img, path of img files
-            "batch_size": 4,
+            "batch_size": 8,
             "num_workers": 6
         },
         "val": {
@@ -48,15 +48,15 @@
                 1,
                 2,
                 4,
-                8
-                // 8,
-                // 16,
-                // 16
+                8,
+                8,
+                16,
+                16
             ],
             "attn_res": [
-                // 16
+                16
             ],
-            "res_blocks": 1,
+            "res_blocks": 2,
             "dropout": 0
         },
         "beta_schedule": { // use munual beta_schedule for acceleration

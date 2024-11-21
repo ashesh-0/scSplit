@@ -8,6 +8,16 @@ import model.networks as networks
 from .base_model import BaseModel
 logger = logging.getLogger('base')
 
+def count_parameters(model):
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+def print_parameter_count(model):
+    count = count_parameters(model)
+    print('')
+    print('--------------------------------------------------')
+    print(f'Number of trainable parameters: {count/1e6:.2f}M')
+    print('--------------------------------------------------')
+    print('')
 
 class DDPM(BaseModel):
     def __init__(self, opt):
@@ -51,6 +61,7 @@ class DDPM(BaseModel):
             print('Scheduler set to ReduceLROnPlateau with patience: ', opt['train']['lr_scheduler']['patience'])
             self.log_dict = OrderedDict()
         self.load_network()
+        print_parameter_count(self.netG)
         # self.print_network()
 
     def feed_data(self, data):

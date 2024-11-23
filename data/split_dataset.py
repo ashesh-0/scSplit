@@ -5,7 +5,8 @@ from skimage.io import imread
 from dataclasses import dataclass
 from typing import Tuple, Dict, List
 # import sys; sys.path.append('..')
-from data.cifar10 import load_train_val_data
+from data.cifar10 import load_train_val_data as load_cifar10_data
+from data.HT_LIF_rawdata import load_HT_LIF_data
 
 @dataclass
 class DataLocation:
@@ -19,7 +20,13 @@ class DataLocation:
 
 def load_data(data_type, dataloc:DataLocation)->Dict[int, List[np.ndarray]]:
     if data_type == 'cifar10':
-        return load_train_val_data(dataloc.directory, [1,7])
+        return load_cifar10_data(dataloc.directory, [1,7])
+    elif data_type == 'HT_LIF':
+        data_arr = load_HT_LIF_data(dataloc.directory)
+        data_dict = {}
+        for i in range(data_arr.shape[-1]):
+            data_dict[i] = [x for x in data_arr[...,i]]
+        return data_dict
     else:
         if dataloc.fpath:
             return _load_data_fpath(dataloc.fpath)
@@ -55,23 +62,35 @@ def compute_normalization_dict(data_dict, channel_weights:List[float], q_val=1.0
         }
 
     else:
-        tar1_unravel = np.concatenate([x.reshape(-1,) for x in data_dict[0]])
-        tar2_unravel = np.concatenate([x.reshape(-1,) for x in data_dict[1]])
-        tar1_max = np.quantile(tar1_unravel, q_val)
-        tar2_max = np.quantile(tar2_unravel, q_val)
-        inp_max = np.quantile(tar1_unravel*channel_weights[0]+(
-                              tar2_unravel*channel_weights[1]), 
+        mean_target = []
+        std_target = []
+        tar_unravel_list = []
+        output_dict = {}
+        for i in range(100):
+            if i not in data_dict:
+                break
+            tar_unravel = np.concatenate([x.reshape(-1,) for x in data_dict[i]])
+            tar_max = np.quantile(tar_unravel, q_val)
+            mean_target.append(tar_max/2)
+            std_target.append(tar_max/2)
+            tar_unravel_list.append(tar_unravel)
+            output_dict[f'target{i}_max'] = tar_max
+
+
+        inp_max = np.quantile(tar_unravel_list[0]*channel_weights[0]+(
+                              tar_unravel_list[1]*channel_weights[1]), 
                               q_val)
-        return {
+        
+        output_dict.update({
+        
             'mean_input': inp_max/2,
             'std_input': inp_max/2,
-            'mean_target': np.array([tar1_max/2, tar2_max/2]),
-            'std_target': np.array([tar1_max/2, tar2_max/2]),
-            # 
-            'target0_max': tar1_max,
-            'target1_max': tar2_max,
+            'mean_target': np.array(mean_target),
+            'std_target': np.array(std_target),
             'input_max': inp_max
-        }
+        })
+        return output_dict
+
 
 def _load_data_channelwise_fpath(fpaths:Tuple[str])-> Dict[int, List[np.ndarray]]:
     assert len(fpaths) == 2, "Only two channelwise fpaths are supported"
@@ -91,7 +110,10 @@ def _load_data_fpath(fpath:str):
     return {0: [x for x in data_ch0], 1: [x for x in data_ch1]}
 
 class SplitDataset:
-    def __init__(self, data_type, data_location:DataLocation, patch_size, target_channel_idx = None,random_patching=False, 
+    def __init__(self, data_type, data_location:DataLocation, patch_size, 
+                 target_channel_idx = None,
+                 input_channel_idx=None,
+                 random_patching=False, 
                  enable_transforms=False,
                  max_qval=0.98,
                  normalization_dict=None,
@@ -114,7 +136,7 @@ class SplitDataset:
         upper_clip: bool - If True, the data is clipped to the max_qval quantile value.
         """
 
-        assert data_type in ['cifar10','Hagen'], "data_type must be one of ['cifar10','Hagen']"
+        assert data_type in ['cifar10','Hagen', 'HT_LIF'], "data_type must be one of ['cifar10','Hagen']"
 
         self._patch_size = patch_size
         self._data_location = data_location
@@ -124,8 +146,16 @@ class SplitDataset:
             self._channel_weights = [1,1]
         # channel_idx is the key. value is list of full sized frames.
         self._data_dict = load_data(data_type, self._data_location)
+        self._numC = len(self._data_dict.keys())
+        for i in range(self._numC):
+            assert i in self._data_dict, f"Channel {i} has no data"
+        
         self._frameN = min(len(self._data_dict[0]), len(self._data_dict[1]))
         self._target_channel_idx = target_channel_idx
+        self._input_channel_idx = input_channel_idx
+        assert self._target_channel_idx is None or self._target_channel_idx <= self._numC, "target_channel_idx must be less than number of channels"
+        assert self._input_channel_idx is None or self._input_channel_idx <= self._numC, "input_channel_idx must be less than number of channels"
+
         self._random_patching = random_patching
         self._uncorrelated_channels = uncorrelated_channels
         self._max_qval = max_qval
@@ -137,7 +167,7 @@ class SplitDataset:
                 # A.VerticalFlip(p=0.5),
                 # A.RandomRotate90(p=0.5)
                 ],
-                additional_targets={'image2': 'image'})
+                additional_targets={f'image{k}': 'image' for k in range(2,2+self._numC-1)})
 
         if normalization_dict is None:
             print("Computing mean and std for normalization")
@@ -145,8 +175,8 @@ class SplitDataset:
 
         if upper_clip:
             print("Clipping data to {} quantile".format(self._max_qval))
-            self._data_dict[0] = [np.clip(x, 0, normalization_dict['target0_max']) for x in self._data_dict[0]]
-            self._data_dict[1] = [np.clip(x, 0, normalization_dict['target1_max']) for x in self._data_dict[1]]
+            for ch_idx in self._data_dict.keys():
+                self._data_dict[ch_idx] = [np.clip(x, 0, normalization_dict['target0_max']) for x in self._data_dict[ch_idx]]
 
         assert 'mean_input' in normalization_dict, "mean_input must be provided"
         assert 'std_input' in normalization_dict, "std_input must be provided"
@@ -236,46 +266,51 @@ class SplitDataset:
     
     def __getitem__(self, index):
 
-        frame_idx, h_idx, w_idx = self._get_location(index)    
-        img1 = self._data_dict[0][frame_idx]
+        frame_idx, h_idx, w_idx = self._get_location(index)
+        img_list = []
+        for i in range(self._numC):    
+            img = self._data_dict[i][frame_idx]
+            img_list.append(img)
+        
+        # img1 = self._data_dict[0][frame_idx]
 
         if self._uncorrelated_channels:
-            frame_idx = np.random.randint(0, self._frameN)
-        img2 = self._data_dict[1][frame_idx]
+            for i in range(1, self._numC):
+                frame_idx = np.random.randint(0, self._frameN)
+                img_list[i] = self._data_dict[i][frame_idx]
         
-        assert img1.shape == img2.shape, "Images must have the same shape"
+        # img2 = self._data_dict[1][frame_idx]
+        patch_arr = []
+        for img in img_list:
+            patch = img[...,h_idx:h_idx+self._patch_size, w_idx:w_idx+self._patch_size].astype(np.float32)
+            patch_arr.append(patch)
+        
         # random h,w location
-        patch1 = img1[...,h_idx:h_idx+self._patch_size, w_idx:w_idx+self._patch_size].astype(np.float32)
-        patch2 = img2[...,h_idx:h_idx+self._patch_size, w_idx:w_idx+self._patch_size].astype(np.float32)
         if self._transform:
-            if patch1.ndim ==3:
-                patch1 = patch1.transpose(1,2,0)
-                patch2 = patch2.transpose(1,2,0)
-            transformed = self._transform(image=patch1, image2=patch2)
-            patch1 = transformed['image']
-            patch2 = transformed['image2']
-            if patch1.ndim ==3:
-                patch1 = patch1.transpose(2,0,1)
-                patch2 = patch2.transpose(2,0,1)
+            if patch_arr[0].ndim ==3:
+                patch_arr = [x.transpose(1,2,0) for x in patch_arr]
+            
+            transform_kwargs = {f'image{k+1}': patch_arr[k] for k in range(1,self._numC)}
+            transformed = self._transform(image=patch_arr[0], **transform_kwargs)
+            patch_arr = [transformed['image']] + [transformed[f'image{k+1}'] for k in range(1,self._numC)]
+            if patch_arr[0].ndim ==3:
+                patch_arr = [x.transpose(2,0,1) for x in patch_arr]
 
-        if patch1.ndim == 2:
-            patch1 = patch1[None]
-            patch2 = patch2[None]
+        if patch_arr[0].ndim == 2:
+            patch_arr = [x[None] for x in patch_arr]
 
-        target = np.concatenate([patch1, patch2], axis=0)
-        target = self.normalize_target(target)
-        
-        if self._input_from_normalized_target:
-            inp = self._channel_weights[0]*target[0:1] + self._channel_weights[1]*target[1:2]
-        else:
-            inp = self._channel_weights[0]*patch1 + self._channel_weights[1]*patch2
-            inp = self.normalize_inp(inp)
-        
 
-        if self._target_channel_idx is None:
-            return {'input':inp, 'target':target}
-        
-        return {'input':inp, 'target':target[self._target_channel_idx: self._target_channel_idx+1]}
+        target = np.concatenate(patch_arr, axis=0)
+        target = self.normalize_target(target)    
+        real_input = None
+        if self._input_channel_idx is not None:
+            real_input = target[self._input_channel_idx:self._input_channel_idx+1]
+            target_mask = np.ones(self._numC)
+            target_mask[self._input_channel_idx] = 0
+            target = target[target_mask.astype(bool)]
+
+        assert self._target_channel_idx is None
+        return {'target':target, 'real_input':real_input}
     
 
 if __name__ == "__main__":

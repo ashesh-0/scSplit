@@ -37,7 +37,7 @@ def get_datasets(opt, tiled_pred=False):
 
     data_type = opt['datasets']['train']['name']  
     uncorrelated_channels = opt['datasets']['train']['uncorrelated_channels']
-    assert data_type in ['cifar10', 'Hagen', "RRW"], "Only cifar10, Hagen and RRW datasets are supported"
+    assert data_type in ['cifar10', 'Hagen', "RRW", "HT_LIF"], "Only cifar10, Hagen and RRW datasets are supported"
     if data_type == 'RRW':
         rootdir = opt['datasets']['datapath']
         train_fpath = os.path.join(rootdir, 'train.txt')
@@ -49,14 +49,16 @@ def get_datasets(opt, tiled_pred=False):
         val_set = RRWDataset(datapath, val_fpath, crop_size=patch_size, fix_sample_A=nimgs, regular_aug=False)
         return train_set, val_set
     else:
+        extra_kwargs = {}
         if data_type == 'Hagen':
             train_data_location = DataLocation(channelwise_fpath=(opt['datasets']['train']['datapath']['ch0'],
                                                             opt['datasets']['train']['datapath']['ch1']))
             val_data_location = DataLocation(channelwise_fpath=(opt['datasets']['val']['datapath']['ch0'],
                                                             opt['datasets']['val']['datapath']['ch1']))
-        elif data_type == 'cifar10':
+        elif data_type in ['cifar10', 'HT_LIF']:
             train_data_location = DataLocation(directory=(opt['datasets']['train']['datapath']))
             val_data_location = DataLocation(directory=(opt['datasets']['val']['datapath']))
+            extra_kwargs['input_channel_idx'] = opt['datasets']['input_channel_idx'] if 'input_channel_idx' in opt['datasets'] else None
         
         input_from_normalized_target = opt['model']['which_model_G'] == 'joint_indi'
         train_set = SplitDataset(data_type, train_data_location, patch_size, 
@@ -64,7 +66,9 @@ def get_datasets(opt, tiled_pred=False):
                                     max_qval=max_qval, upper_clip=upper_clip,
                                     uncorrelated_channels=uncorrelated_channels,
                                     channel_weights=channel_weights,
-                                normalization_dict=None, enable_transforms=True,random_patching=True, input_from_normalized_target=input_from_normalized_target)
+                                normalization_dict=None, enable_transforms=True,random_patching=True, 
+                                input_from_normalized_target=input_from_normalized_target,
+                                **extra_kwargs)
 
         if not tiled_pred:
             class_obj = SplitDataset 
@@ -79,7 +83,8 @@ def get_datasets(opt, tiled_pred=False):
                             upper_clip=upper_clip,
                             channel_weights=channel_weights,
                             enable_transforms=False,
-                            random_patching=False, input_from_normalized_target=input_from_normalized_target)
+                            random_patching=False, input_from_normalized_target=input_from_normalized_target,
+                            **extra_kwargs)
         return train_set, val_set
 
 

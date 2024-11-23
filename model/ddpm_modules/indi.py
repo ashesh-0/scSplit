@@ -23,6 +23,7 @@ class InDI(GaussianDiffusion):
         schedule_opt=None,
         val_schedule_opt=None,
         e = 0.01,
+        time_predictor=None,
     ):
         super().__init__(denoise_fn, image_size, channels=channels, loss_type=loss_type, conditional=conditional, 
                          lr_reduction=lr_reduction,
@@ -39,6 +40,7 @@ class InDI(GaussianDiffusion):
             self.e = 0.0
         
         self.val_num_timesteps = val_schedule_opt['n_timestep']
+        self.time_predictor = time_predictor
         
         msg = f'Sampling mode: {self._t_sampling_mode}, Noise mode: {self._noise_mode}'
         print(f'[{self.__class__.__name__}]: {msg}')
@@ -114,15 +116,15 @@ class InDI(GaussianDiffusion):
     def interpolate(self, x1, x2, t=None, lam=0.5):
         raise NotImplementedError("This is not needed.")
     
-    def q_sample(self, x_start, x_end, t:float, noise=None):
+    def get_xt_clean(self, x_start, x_end, t:float):
         assert 0 < t.min(), "t > 0"
         assert t.max() <= 1, "t <= 1. but t is {}".format(t.max())
 
         if len(t.shape) ==1:
             t = t.reshape(-1, 1, 1, 1)
 
-        noise = default(noise, lambda: torch.randn_like(x_start))
-        return (1-t)*x_start + t*x_end + noise * self.get_t_times_e(t)
+        x_t_clean = (1-t)*x_start + t*x_end
+        return x_t_clean
         
     def sample_t(self, batch_size, device):
         if self._t_sampling_mode == 'linear_ramp':
@@ -150,18 +152,26 @@ class InDI(GaussianDiffusion):
         t_float = t/self.num_timesteps
         return t_float
 
-    def get_prediction_during_training(self, x_in, noise=None):
+    def get_prediction_during_training(self, x_in, noise=None, use_superimposed_input=False):
         # pass
         x_start = x_in['target']
         x_end = x_in['input']
+
         # we want to make sure that the shape for x_end is the same as x_start.
-        factor = self.out_channel // x_end.shape[1]
-        x_end = torch.concat([x_end]*factor, dim=1)
-        b, *_ = x_start.shape
-        t_float = self.sample_t(b, x_start.device)
-        
+        if use_superimposed_input:
+            x_supimposed_input = x_in['supimposed_input'] # this is already some mixture of x_start and x_end. it can come from microscope
+            x_clean = x_supimposed_input
+            t_float = self.time_predictor(x_clean)
+        else:
+            factor = self.out_channel // x_end.shape[1]
+            x_end = torch.concat([x_end]*factor, dim=1)
+            b, *_ = x_start.shape
+            t_float = self.sample_t(b, x_start.device)
+            x_clean = self.get_xt_clean(x_start=x_start, x_end=x_end, t=t_float)
+
         noise = default(noise, lambda: torch.randn_like(x_start))
-        x_noisy = self.q_sample(x_start=x_start, x_end=x_end, t=t_float, noise=noise)
+        x_noisy = x_clean + noise * self.get_t_times_e(t_float).reshape(-1, 1, 1, 1)
+
         assert self.conditional is False
         x_recon = self.denoise_fn(x_noisy, t_float)
         return x_recon

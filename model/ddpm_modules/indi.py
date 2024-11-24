@@ -152,33 +152,38 @@ class InDI(GaussianDiffusion):
         t_float = t/self.num_timesteps
         return t_float
 
+    def time_prediction_loss(self, x_clean, actual_t):
+        predicted_t = self.time_predictor(x_clean)
+        loss = F.mse_loss(predicted_t, actual_t)
+        return loss
+    
     def get_prediction_during_training(self, x_in, noise=None, use_superimposed_input=False):
         # pass
-        x_start = x_in['target']
-        x_end = x_in['input']
 
         # we want to make sure that the shape for x_end is the same as x_start.
         if use_superimposed_input:
-            x_supimposed_input = x_in['supimposed_input'] # this is already some mixture of x_start and x_end. it can come from microscope
-            x_clean = x_supimposed_input
+            x_superimposed_input = x_in['superimposed_input'] # this is already some mixture of x_start and x_end. it can come from microscope
+            x_clean = x_superimposed_input
             t_float = self.time_predictor(x_clean)
         else:
+            x_start = x_in['target']
+            x_end = x_in['input']
             factor = self.out_channel // x_end.shape[1]
             x_end = torch.concat([x_end]*factor, dim=1)
             b, *_ = x_start.shape
             t_float = self.sample_t(b, x_start.device)
             x_clean = self.get_xt_clean(x_start=x_start, x_end=x_end, t=t_float)
 
-        noise = default(noise, lambda: torch.randn_like(x_start))
+        noise = default(noise, lambda: torch.randn_like(x_clean))
         x_noisy = x_clean + noise * self.get_t_times_e(t_float).reshape(-1, 1, 1, 1)
 
         assert self.conditional is False
         x_recon = self.denoise_fn(x_noisy, t_float)
-        return x_recon
+        return x_recon, {'t_float': t_float, 'x_clean': x_clean}
 
     def p_losses(self, x_in, noise=None):
         x_start = x_in['target']
-        x_recon = self.get_prediction_during_training(x_in, noise=noise)    
+        x_recon, _ = self.get_prediction_during_training(x_in, noise=noise)    
         loss = self.loss_func(x_start, x_recon)
 
         return loss

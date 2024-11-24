@@ -35,6 +35,16 @@ class IndiFullTranslation(InDI):
         t[mask_for_max] = maxv
         return t / self.num_timesteps
 
+def get_complementary_time_predictor(time_predictor):
+    class ComplementaryTimePredictor(nn.Module):
+        def __init__(self, time_predictor_ch0):
+            super().__init__()
+            self.time_predictor_ch0 = time_predictor_ch0
+        
+        def forward(self, x):
+            return 1 - self.time_predictor_ch0(x)
+    
+    return ComplementaryTimePredictor(time_predictor)
 
 class JointIndi(nn.Module):
     def __init__(
@@ -53,12 +63,18 @@ class JointIndi(nn.Module):
         w_input_loss = 0.0,
         e = 0.01,
         allow_full_translation=False,
+        time_predictor=None,
     ):
         super().__init__()
         assert denoise_fn_ch1 is not None, "denoise_fn_ch1 is not provided."
         assert denoise_fn_ch2 is not None, "denoise_fn_ch2 is not provided."
         assert denoise_fn is None, "denoise_fn is not needed."
         indi_class = IndiCustomT if not allow_full_translation else IndiFullTranslation
+        self.time_predictor1 = self.time_predictor2 = None
+        if time_predictor is not None:
+            self.time_predictor1 = time_predictor
+            self.time_predictor2 = get_complementary_time_predictor(time_predictor)
+
         self.indi1 = indi_class(denoise_fn_ch1, image_size, channels=channels, 
                           loss_type=loss_type, 
                           out_channel = out_channel, 
@@ -66,7 +82,9 @@ class JointIndi(nn.Module):
                           conditional=conditional, 
                           schedule_opt=schedule_opt, 
                           val_schedule_opt=val_schedule_opt, 
-                          e=e)
+                          e=e,
+                            time_predictor=self.time_predictor1
+                          )
 
         self.indi2 = indi_class(denoise_fn_ch2, image_size, channels=channels, 
                           loss_type=loss_type, 
@@ -75,7 +93,8 @@ class JointIndi(nn.Module):
                           conditional=conditional, 
                           schedule_opt=schedule_opt, 
                           val_schedule_opt=val_schedule_opt, 
-                          e=e)
+                          e=e,
+                            time_predictor=self.time_predictor2)
 
         self.val_num_timesteps = self.indi1.val_num_timesteps
 
@@ -83,9 +102,10 @@ class JointIndi(nn.Module):
         self.offset_param = nn.Parameter(torch.tensor(0.0))
         self.scale_param = nn.Parameter(torch.tensor(1.0))
         self.w_input_loss = w_input_loss
+        self.w_t_predictor_loss = 1.0
         self.current_log_dict = {}
-
-        print(f'[{self.__class__.__name__}]: w_input_loss: {self.w_input_loss}')
+        with_time_predictor = 'With Time Predictor' if time_predictor is not None else ''
+        print(f'[{self.__class__.__name__}]: w_input_loss: {self.w_input_loss}', with_time_predictor)
     
     def get_offset(self):
         return self.offset_param
@@ -104,20 +124,39 @@ class JointIndi(nn.Module):
         x_in_ch1 = {'target': x_in['target'][:,0:1], 'input': x_in['target'][:,1:2]}
         x_in_ch2 = {'target': x_in['target'][:,1:2], 'input': x_in['target'][:,0:1]}
 
-        x_recon_ch1 = self.indi1.get_prediction_during_training(x_in_ch1, noise=noise)    
-        x_recon_ch2 = self.indi2.get_prediction_during_training(x_in_ch2, noise=noise)
+        x_recon_ch1, pred_dict1 = self.indi1.get_prediction_during_training(x_in_ch1, noise=noise)    
+        x_recon_ch2, pred_dict2 = self.indi2.get_prediction_during_training(x_in_ch2, noise=noise)
 
         loss_ch1 = self.indi1.loss_func(x_in_ch1['target'], x_recon_ch1)
         loss_ch2 = self.indi2.loss_func(x_in_ch2['target'], x_recon_ch2)
         loss_splitting = (loss_ch1 + loss_ch2) / 2
         loss_input = 0.0
-        
+        loss_realinput = 0.0
+        loss_t_predictor = 0.0
+        if self.time_predictor1 is not None:
+            assert self.time_predictor2 is not None, "time_predictor2 is not provided."
+            # get the loss for the time predictor
+            loss_t1 =self.indi1.time_prediction_loss(pred_dict1['x_clean'], pred_dict1['t_float'])
+            loss_t2 = self.indi2.time_prediction_loss(pred_dict2['x_clean'], pred_dict2['t_float'])
+
+            loss_t_predictor = (loss_t1 + loss_t2) / 2
+
+            x_recon_ch1,_ = self.indi1.get_prediction_during_training({'superimposed_input':x_in['input']}, use_superimposed_input=True)    
+            x_recon_ch2,_ = self.indi2.get_prediction_during_training({'superimposed_input':x_in['input']}, use_superimposed_input=True)
+            
+            loss_ch1_realinput = self.indi1.loss_func(x_in_ch1['target'], x_recon_ch1)
+            loss_ch2_realinput = self.indi2.loss_func(x_in_ch2['target'], x_recon_ch2)
+            loss_realinput = (loss_ch1_realinput + loss_ch2_realinput) / 2
+
         # self.current_log_dict['loss_input'] = loss_input.item()
         self.current_log_dict['loss_splitting'] = loss_splitting.item()
         self.current_log_dict['alpha'] = self.get_alpha().item()
         self.current_log_dict['offset'] = self.get_offset().item()
         self.current_log_dict['scale'] = self.get_scale().item()
-        return loss_splitting + self.w_input_loss*loss_input
+        self.current_log_dict['loss_realinput'] = loss_realinput.item()
+        self.current_log_dict['loss_t_predictor'] = loss_t_predictor.item()
+        # print(loss_splitting.item(), loss_realinput.item(), loss_t_predictor.item())
+        return loss_splitting + self.w_input_loss*loss_input + loss_realinput + self.w_t_predictor_loss*loss_t_predictor
     
 
     def _get_t_values(self, t_start, num_timesteps, eps=1e-8):
@@ -129,9 +168,15 @@ class JointIndi(nn.Module):
     
 
     @torch.no_grad()
-    def inference(self, x_in, continuous=False, num_timesteps=None, t_float_start=0.5, eps=1e-8):
-        ch1 = self.indi1.inference(x_in, continuous=continuous, num_timesteps=num_timesteps, t_float_start=t_float_start, eps=eps)
-        ch2 = self.indi2.inference(x_in, continuous=continuous, num_timesteps=num_timesteps, t_float_start=1-t_float_start, eps=eps)
+    def inference(self, x_in, continuous=False, num_timesteps=None, t_float_start=0.5, eps=1e-8, infer_time=False):
+        t_float_start_ch1 = t_float_start
+        t_float_start_ch2 = 1 - t_float_start
+        if infer_time:
+            t_float_start_ch1 = self.time_predictor1(x_in['input']).cpu().item()
+            t_float_start_ch2 = self.time_predictor2(x_in['input']).cpu().item()
+        
+        ch1 = self.indi1.inference(x_in, continuous=continuous, num_timesteps=num_timesteps, t_float_start=t_float_start_ch1, eps=eps)
+        ch2 = self.indi2.inference(x_in, continuous=continuous, num_timesteps=num_timesteps, t_float_start=t_float_start_ch2, eps=eps)
         return torch.cat([ch1, ch2], dim=1)
 
 

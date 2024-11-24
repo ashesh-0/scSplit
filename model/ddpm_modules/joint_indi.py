@@ -153,8 +153,8 @@ class JointIndi(nn.Module):
         self.current_log_dict['alpha'] = self.get_alpha().item()
         self.current_log_dict['offset'] = self.get_offset().item()
         self.current_log_dict['scale'] = self.get_scale().item()
-        self.current_log_dict['loss_realinput'] = loss_realinput.item()
-        self.current_log_dict['loss_t_predictor'] = loss_t_predictor.item()
+        self.current_log_dict['loss_realinput'] = loss_realinput.item() if self.time_predictor1 is not None else 0.0
+        self.current_log_dict['loss_t_predictor'] = loss_t_predictor.item() if self.time_predictor1 is not None else 0.0
         # print(loss_splitting.item(), loss_realinput.item(), loss_t_predictor.item())
         return loss_splitting + self.w_input_loss*loss_input + loss_realinput + self.w_t_predictor_loss*loss_t_predictor
     

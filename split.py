@@ -78,7 +78,7 @@ def get_datasets(opt, tiled_pred=False):
             class_obj = get_tiling_dataset(SplitDataset, tile_manager)
 
         val_set = class_obj(data_type, val_data_location, patch_size, target_channel_idx=target_channel_idx,
-                            normalization_dict=train_set.get_normalization_dict(),
+                            normalization_dict=train_set.normalization_dict,
                             max_qval=max_qval,
                             upper_clip=upper_clip,
                             channel_weights=channel_weights,
@@ -202,19 +202,21 @@ if __name__ == "__main__":
                         # input_img = Metrics.tensor2img(input, min_max=[input.min(), input.max()])  # uint8
                         target_arr = []
                         pred_arr = []
-                        mean_target = val_set.get_normalization_dict()['mean_target']
-                        std_target = val_set.get_normalization_dict()['std_target']
-                        mean_input = val_set.get_normalization_dict()['mean_input']
-                        std_input = val_set.get_normalization_dict()['std_input']
+                        mean_target = val_set.get_input_target_normalization_dict()['mean_target']
+                        std_target = val_set.get_input_target_normalization_dict()['std_target']
+                        mean_input = val_set.get_input_target_normalization_dict()['mean_input']
+                        std_input = val_set.get_input_target_normalization_dict()['std_input']
                         assert input.shape[0] == 1
                         assert target.shape[0] == 1
                         assert prediction.shape[0] == 1
-                        input = input[0]
-                        target = target[0]
-                        prediction = prediction[0]
                         input_img = ((input * std_input + mean_input)/2).astype(np.uint16)
                         target_img = (target * std_target + mean_target).astype(np.uint16)
                         pred_img = (prediction * std_target + mean_target)
+                        
+                        input_img = input_img[0]
+                        target_img = target_img[0]
+                        pred_img = pred_img[0]
+
                         pred_img[pred_img < 0] = 0
                         pred_img[pred_img > 65535] = 65535
                         pred_img=pred_img.astype(np.uint16)

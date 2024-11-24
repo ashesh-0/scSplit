@@ -24,7 +24,7 @@
             "datapath": "/group/jug/ashesh/data/diffsplit_HT_LIF/500ms/Ch_B-Ch_D-Ch_BD/train/",
             "datatype": "img", //lmdb or img, path of img files
             "batch_size": 4,
-            "num_workers": 0,
+            "num_workers": 4,
             "use_shuffle": true,
             "uncorrelated_channels": false
         },

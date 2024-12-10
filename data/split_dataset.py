@@ -33,6 +33,33 @@ def load_data(data_type, dataloc:DataLocation)->Dict[int, List[np.ndarray]]:
         elif len(dataloc.channelwise_fpath) > 0:
             return _load_data_channelwise_fpath(dataloc.channelwise_fpath)
 
+def compute_mean_stdev_based_normalization(data_dict, patch_size:int, numC:int, num_patches=10000):
+    output = {
+        'mean_channel': np.array([np.nan]*numC),
+        'std_channel': np.array([np.nan]*numC),
+    }
+    for c_idx in range(numC):
+        ch_data = data_dict[c_idx]
+        mean_arr = []
+        std_arr = []
+        for _ in range(num_patches):
+            idx = np.random.randint(0, len(ch_data))
+            img = ch_data[idx]
+            h,w = img.shape[-2:]
+            h_idx = np.random.randint(0, h-patch_size)
+            w_idx = np.random.randint(0, w-patch_size)
+            patch = img[h_idx:h_idx+patch_size, w_idx:w_idx+patch_size]
+            mean_arr.append(np.mean(patch))
+            std_arr.append(np.std(patch))
+        
+        output['mean_channel'][c_idx] = np.mean(mean_arr)
+        output['std_channel'][c_idx] = np.mean(std_arr)
+    
+    output['mean_input'] = np.array([np.nan])
+    output['std_input'] = np.array([np.nan])
+
+    return output
+
 def compute_normalization_dict(data_dict, channel_weights:List[float], numC:int, q_val=1.0, uint8_data=False):
     """
     x/x_max [0,1]
@@ -168,7 +195,8 @@ class SplitDataset:
 
         if normalization_dict is None:
             print("Computing mean and std for normalization")
-            normalization_dict = compute_normalization_dict(self._data_dict, self._channel_weights, self._numC, q_val=self._max_qval, uint8_data=data_type=='cifar10')
+            normalization_dict = compute_mean_stdev_based_normalization(self._data_dict,  self._patch_size, self._numC)
+            # normalization_dict = compute_normalization_dict(self._data_dict, self._channel_weights, self._numC, q_val=self._max_qval, uint8_data=data_type=='cifar10')
         
         self.normalization_dict = normalization_dict
 
@@ -199,7 +227,7 @@ class SplitDataset:
         std_input = self.normalization_dict['std_input'].copy()
         mean_channel = self.normalization_dict['mean_channel'].copy()
         std_channel = self.normalization_dict['std_channel'].copy()
-        input_max = self.normalization_dict['input_max'].copy()
+        # input_max = self.normalization_dict['input_max'].copy()
 
         if self._input_channel_idx is not None:
             mean_input = mean_channel[self._input_channel_idx]
@@ -208,21 +236,21 @@ class SplitDataset:
             target_mask[self._input_channel_idx] = 0
             mean_channel = mean_channel[target_mask.astype(bool)]
             std_channel = std_channel[target_mask.astype(bool)]
-            input_max = self.normalization_dict[f'ch{self._input_channel_idx}_max']
+            # input_max = self.normalization_dict[f'ch{self._input_channel_idx}_max']
 
         output_dict ={
             'mean_input': mean_input.reshape(1,-1,1,1),
             'std_input': std_input.reshape(1,-1,1,1),
             'mean_target': mean_channel.reshape(1,-1,1,1),
             'std_target': std_channel.reshape(1,-1,1,1),
-            'input_max': input_max,
+            # 'input_max': input_max,
         }
-        target_idx = 0
-        for ch_idx in range(self._numC):
-            if ch_idx == self._input_channel_idx:
-                continue
-            output_dict[f'target{target_idx}_max'] = self.normalization_dict[f'ch{ch_idx}_max']
-            target_idx += 1
+        # target_idx = 0
+        # for ch_idx in range(self._numC):
+        #     if ch_idx == self._input_channel_idx:
+        #         continue
+        #     output_dict[f'target{target_idx}_max'] = self.normalization_dict[f'ch{ch_idx}_max']
+        #     target_idx += 1
         return output_dict
 
     def normalize_inp(self, inp):
@@ -342,7 +370,6 @@ if __name__ == "__main__":
         print(inp.min(), inp.max(),end='\t')
         print(target[0].min(), target[0].max(), end='\t')
         print(target[1].min(), target[1].max())
-        # break   
 
 
     import matplotlib.pyplot as plt

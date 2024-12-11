@@ -10,6 +10,44 @@ import torch
 
 from model.ddpm_modules.diffusion import GaussianDiffusion, exists, default, make_beta_schedule
 
+class NormalizerXT:
+    """
+    A class which returns the normalization parameters for x_t.
+    """
+    def __init__(self, data_mean=None, data_std=None, num_bins=100, stop_update_count=1e6):
+        self.data_mean_fixed = data_mean
+        self.data_std_fixed = data_std
+        self.num_bins = num_bins
+        self.stop_update_count = stop_update_count
+        if self.data_mean_fixed is None:
+            self.data_mean = torch.Tensor([0.0]*num_bins)
+            assert self.data_std_fixed is None
+            self.data_std = torch.Tensor([1.0]*num_bins)
+            self.count = torch.Tensor([0.0]*num_bins)
+        else:
+            self.data_mean = self.data_mean_fixed
+            self.data_std = self.data_std_fixed
+            self.count = None
+
+    def update(self, x_t, t):
+        assert self.data_mean_fixed is None, "update() should not be called when data_mean is fixed."
+
+        for batch_idx in range(x_t.shape[0]):
+            t_bin = int(t[batch_idx].item()*self.num_bins)
+            self.data_mean[t_bin] = (self.data_mean[t_bin]*self.count[t_bin] + x_t[batch_idx].mean())/(1 + self.count[t_bin])
+            self.data_std[t_bin] = (self.data_std[t_bin]*self.count[t_bin] + x_t[batch_idx].std())/(1 + self.count[t_bin])
+            self.count[t_bin] += 1
+    
+    def normalize(self, x_t, t, update=False):
+        if update and torch.sum(self.count) < self.stop_update_count:
+            self.update(x_t, t)
+        
+        param_shape = [len(x_t)] + [1]*(len(x_t.shape)-1)
+        t_bins = (t.detach().cpu().numpy()*self.num_bins).astype(np.int32)
+        mean_val = torch.Tensor([self.data_mean[t_bin] for t_bin in t_bins]).reshape(param_shape).to(x_t.device)
+        std_val = torch.Tensor([self.data_std[t_bin] for t_bin in t_bins]).reshape(param_shape).to(x_t.device)
+        return (x_t - mean_val) / std_val
+
 class InDI(GaussianDiffusion):
     def __init__(
         self,
@@ -24,10 +62,12 @@ class InDI(GaussianDiffusion):
         val_schedule_opt=None,
         e = 0.01,
         time_predictor=None,
+        normalize_xt=False,
     ):
         super().__init__(denoise_fn, image_size, channels=channels, loss_type=loss_type, conditional=conditional, 
                          lr_reduction=lr_reduction,
-                         schedule_opt=schedule_opt)
+                         schedule_opt=schedule_opt,
+                         )
         self.e = e
         self.out_channel = out_channel
         self._t_sampling_mode = 'linear_indi'
@@ -41,6 +81,9 @@ class InDI(GaussianDiffusion):
         
         self.val_num_timesteps = val_schedule_opt['n_timestep']
         self.time_predictor = time_predictor
+        self._normalize_xt = normalize_xt
+        if self._normalize_xt:
+            self._xt_normalizer = NormalizerXT(num_bins=100)
         
         msg = f'Sampling mode: {self._t_sampling_mode}, Noise mode: {self._noise_mode}'
         print(f'[{self.__class__.__name__}]: {msg}')
@@ -116,6 +159,11 @@ class InDI(GaussianDiffusion):
     def interpolate(self, x1, x2, t=None, lam=0.5):
         raise NotImplementedError("This is not needed.")
     
+    def normalize_xt(self, x_t, t):
+        t_bin = int(t*self._normalize_xt_num_bins)
+        mean_val, std_val = self._normalizer_xt.get_params(t_bin)
+        return (x_t - mean_val) / std_val
+
     def get_xt_clean(self, x_start, x_end, t:float):
         assert 0 < t.min(), "t > 0"
         assert t.max() <= 1, "t <= 1. but t is {}".format(t.max())
@@ -124,7 +172,12 @@ class InDI(GaussianDiffusion):
             t = t.reshape(-1, 1, 1, 1)
 
         x_t_clean = (1-t)*x_start + t*x_end
+
+        # normalization
+        if self._normalize_xt:
+            x_t_clean = self._xt_normalizer.normalize(x_t_clean, t, update=True)
         return x_t_clean
+    
         
     def sample_t(self, batch_size, device):
         if self._t_sampling_mode == 'linear_ramp':

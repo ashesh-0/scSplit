@@ -64,6 +64,7 @@ class JointIndi(nn.Module):
         e = 0.01,
         allow_full_translation=False,
         time_predictor=None,
+        normalize_xt=False,
     ):
         super().__init__()
         assert denoise_fn_ch1 is not None, "denoise_fn_ch1 is not provided."
@@ -83,7 +84,8 @@ class JointIndi(nn.Module):
                           schedule_opt=schedule_opt, 
                           val_schedule_opt=val_schedule_opt, 
                           e=e,
-                            time_predictor=self.time_predictor1
+                            time_predictor=self.time_predictor1,
+                            normalize_xt=normalize_xt,
                           )
 
         self.indi2 = indi_class(denoise_fn_ch2, image_size, channels=channels, 
@@ -94,7 +96,8 @@ class JointIndi(nn.Module):
                           schedule_opt=schedule_opt, 
                           val_schedule_opt=val_schedule_opt, 
                           e=e,
-                            time_predictor=self.time_predictor2)
+                            time_predictor=self.time_predictor2,
+                            normalize_xt=normalize_xt)
 
         self.val_num_timesteps = self.indi1.val_num_timesteps
 

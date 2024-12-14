@@ -10,24 +10,27 @@ import torch
 
 from model.ddpm_modules.diffusion import GaussianDiffusion, exists, default, make_beta_schedule
 
-class NormalizerXT:
+class NormalizerXT(nn.Module):
     """
     A class which returns the normalization parameters for x_t.
     """
     def __init__(self, data_mean=None, data_std=None, num_bins=100, stop_update_count=1e6):
+        super().__init__()
         self.data_mean_fixed = data_mean
         self.data_std_fixed = data_std
         self.num_bins = num_bins
         self.stop_update_count = stop_update_count
         if self.data_mean_fixed is None:
-            self.data_mean = torch.Tensor([0.0]*num_bins)
+            self.register_buffer("data_mean",torch.Tensor([0.0]*num_bins))
+            self.register_buffer("data_std",torch.Tensor([1.0]*num_bins))
+            self.register_buffer("count",torch.Tensor([0.0]*num_bins))
             assert self.data_std_fixed is None
             self.data_std = torch.Tensor([1.0]*num_bins)
             self.count = torch.Tensor([0.0]*num_bins)
         else:
-            self.data_mean = self.data_mean_fixed
-            self.data_std = self.data_std_fixed
-            self.count = None
+            self.register_buffer("data_mean",torch.Tensor(self.data_mean_fixed))
+            self.register_buffer("data_std",torch.Tensor(self.data_std_fixed))
+            self.register_buffer("count",torch.Tensor([stop_update_count]*num_bins))
 
     def update(self, x_t, t):
         assert self.data_mean_fixed is None, "update() should not be called when data_mean is fixed."

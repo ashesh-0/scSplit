@@ -144,12 +144,16 @@ class JointIndi(nn.Module):
 
             loss_t_predictor = (loss_t1 + loss_t2) / 2
 
-            x_recon_ch1,_ = self.indi1.get_prediction_during_training({'superimposed_input':x_in['input']}, use_superimposed_input=True)    
-            x_recon_ch2,_ = self.indi2.get_prediction_during_training({'superimposed_input':x_in['input']}, use_superimposed_input=True)
-            
-            loss_ch1_realinput = self.indi1.loss_func(x_in_ch1['target'], x_recon_ch1)
-            loss_ch2_realinput = self.indi2.loss_func(x_in_ch2['target'], x_recon_ch2)
-            loss_realinput = (loss_ch1_realinput + loss_ch2_realinput) / 2
+            # real input is one which is not all zeros. 
+            real_input = x_in['input']
+            valid_mask = ~((real_input ==0).reshape(len(real_input),-1).all(dim=1))
+            if valid_mask.sum() > 0:
+                x_recon_ch1,_ = self.indi1.get_prediction_during_training({'superimposed_input':real_input[valid_mask]}, use_superimposed_input=True)    
+                x_recon_ch2,_ = self.indi2.get_prediction_during_training({'superimposed_input':real_input[valid_mask]}, use_superimposed_input=True)
+                
+                loss_ch1_realinput = self.indi1.loss_func(x_in_ch1['target'][valid_mask], x_recon_ch1)
+                loss_ch2_realinput = self.indi2.loss_func(x_in_ch2['target'][valid_mask], x_recon_ch2)
+                loss_realinput = (loss_ch1_realinput + loss_ch2_realinput) / 2
 
         # self.current_log_dict['loss_input'] = loss_input.item()
         self.current_log_dict['loss_splitting'] = loss_splitting.item()

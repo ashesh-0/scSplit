@@ -144,6 +144,7 @@ class SplitDataset:
                  uncorrelated_channels=False,
                  channel_weights=None,
                  input_from_normalized_target=False,
+                 real_input_fraction=None,
                  upper_clip=False):
         """
         Args:
@@ -158,6 +159,7 @@ class SplitDataset:
         uncorrelated_channels: bool - If True, the two diffrent random locations are used to crop patches from the two channels. Else, the same location is used.
         channel_weights: list - Input is the weighted sum of the two channels. If None, the weights are set to 1.
         upper_clip: bool - If True, the data is clipped to the max_qval quantile value.
+        real_input_fraction: for what fraction of the dataset starting from index 0, should the real input be returned. Otherwise, all zero tensor is returned. 
         """
         allowed_data_types = ['cifar10','Hagen', 'HT_LIF']
         assert data_type in allowed_data_types, f"data_type must be one of {allowed_data_types}"
@@ -177,8 +179,12 @@ class SplitDataset:
         self._frameN = min(len(self._data_dict[0]), len(self._data_dict[1]))
         self._target_channel_idx = target_channel_idx
         self._input_channel_idx = input_channel_idx
+        self._real_input_fraction = real_input_fraction
+        assert self._real_input_fraction is None or self._input_channel_idx is not None, "For real input fraction to make sense, we should have a real input"
         assert self._target_channel_idx is None or self._target_channel_idx <= self._numC, "target_channel_idx must be less than number of channels"
         assert self._input_channel_idx is None or self._input_channel_idx <= self._numC, "input_channel_idx must be less than number of channels"
+        if self._real_input_fraction is not None:
+            print(f'Using first {self.frames_with_real_input()}/{self._frameN} for real input')
 
         self._random_patching = random_patching
         self._uncorrelated_channels = uncorrelated_channels
@@ -218,8 +224,13 @@ class SplitDataset:
         if channel_weights is not None:
             msg += f' ChW:{self._channel_weights}'
         
+        if self._real_input_fraction is not None:
+            msg += f' RealFraction:{self._real_input_fraction}'
+
         if self._input_from_normalized_target:
             msg += f' InpFrmNormTar'
+        
+
         print(msg)
 
     def get_input_target_normalization_dict(self):
@@ -295,6 +306,9 @@ class SplitDataset:
             frame_idx, h_idx, w_idx = self.patch_location(index)
         return frame_idx, h_idx, w_idx
     
+    def frames_with_real_input(self):
+        return int(self._frameN*self._real_input_fraction)
+    
     def __getitem__(self, index):
 
         frame_idx, h_idx, w_idx = self._get_location(index)
@@ -335,7 +349,12 @@ class SplitDataset:
         target = self.normalize_channels(target)    
         real_input = None
         if self._input_channel_idx is not None:
-            real_input = target[self._input_channel_idx:self._input_channel_idx+1]
+            if self._real_input_fraction is None or frame_idx <= self.frames_with_real_input():
+                # for the initial real_input_fraction dataset, real input is returned.
+                real_input = target[self._input_channel_idx:self._input_channel_idx+1]
+            else:
+                real_input = np.zeros_like(target[self._input_channel_idx:self._input_channel_idx+1])
+            
             target_mask = np.ones(self._numC)
             target_mask[self._input_channel_idx] = 0
             target = target[target_mask.astype(bool)]

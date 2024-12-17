@@ -214,8 +214,6 @@ class InDI(GaussianDiffusion):
         return loss
     
     def get_prediction_during_training(self, x_in, noise=None, use_superimposed_input=False):
-        # pass
-
         # we want to make sure that the shape for x_end is the same as x_start.
         if use_superimposed_input:
             x_superimposed_input = x_in['superimposed_input'] # this is already some mixture of x_start and x_end. it can come from microscope

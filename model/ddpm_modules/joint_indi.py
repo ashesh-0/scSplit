@@ -179,8 +179,8 @@ class JointIndi(nn.Module):
         t_float_start_ch1 = t_float_start
         t_float_start_ch2 = 1 - t_float_start
         if infer_time:
-            t_float_start_ch1 = self.time_predictor1(x_in['input']).cpu().item()
-            t_float_start_ch2 = self.time_predictor2(x_in['input']).cpu().item()
+            t_float_start_ch1 = self.time_predictor1(x_in).cpu().item()
+            t_float_start_ch2 = self.time_predictor2(x_in).cpu().item()
         
         ch1 = self.indi1.inference(x_in, continuous=continuous, num_timesteps=num_timesteps, t_float_start=t_float_start_ch1, eps=eps)
         ch2 = self.indi2.inference(x_in, continuous=continuous, num_timesteps=num_timesteps, t_float_start=t_float_start_ch2, eps=eps)

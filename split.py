@@ -37,7 +37,8 @@ def get_datasets(opt, tiled_pred=False):
 
     data_type = opt['datasets']['train']['name']  
     uncorrelated_channels = opt['datasets']['train']['uncorrelated_channels']
-    assert data_type in ['cifar10', 'Hagen', "RRW", "HT_LIF"], "Only cifar10, Hagen and RRW datasets are supported"
+    allowed_dsets = ['cifar10', 'Hagen', "RRW", "HT_LIF", "COSEM_jrc-hela"]
+    assert data_type in allowed_dsets, f"Only one of {allowed_dsets} datasets are supported. Found {data_type}"
     if data_type == 'RRW':
         rootdir = opt['datasets']['datapath']
         train_fpath = os.path.join(rootdir, 'train.txt')
@@ -56,7 +57,7 @@ def get_datasets(opt, tiled_pred=False):
                                                             opt['datasets']['train']['datapath']['ch1']))
             val_data_location = DataLocation(channelwise_fpath=(opt['datasets']['val']['datapath']['ch0'],
                                                             opt['datasets']['val']['datapath']['ch1']))
-        elif data_type in ['cifar10', 'HT_LIF']:
+        elif data_type in ['cifar10', 'HT_LIF', 'COSEM_jrc-hela']:
             train_data_location = DataLocation(directory=(opt['datasets']['train']['datapath']))
             val_data_location = DataLocation(directory=(opt['datasets']['val']['datapath']))
             extra_kwargs['input_channel_idx'] = opt['datasets']['input_channel_idx'] if 'input_channel_idx' in opt['datasets'] else None
@@ -78,7 +79,10 @@ def get_datasets(opt, tiled_pred=False):
         if not tiled_pred:
             class_obj = SplitDataset 
         else:
-            data_shape = (10, 2048, 2048)
+            if data_type == 'Hagen':
+                data_shape = (10, 2048, 2048)
+            elif data_type == 'HT_LIF':
+                data_shape = (12, 1608, 1608)
             tile_manager = get_tile_manager(data_shape, (1, patch_size//2, patch_size//2), (1, patch_size, patch_size))
             class_obj = get_tiling_dataset(SplitDataset, tile_manager)
 

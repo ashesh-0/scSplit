@@ -7,7 +7,6 @@ from typing import Tuple, Dict, List
 # import sys; sys.path.append('..')
 from data.cifar10 import load_train_val_data as load_cifar10_data
 from data.HT_LIF_rawdata import load_HT_LIF_data
-
 @dataclass
 class DataLocation:
     fpath: str = ''
@@ -27,6 +26,13 @@ def load_data(data_type, dataloc:DataLocation)->Dict[int, List[np.ndarray]]:
         for i in range(data_arr.shape[-1]):
             data_dict[i] = [x for x in data_arr[...,i]]
         return data_dict
+    elif data_type == 'COSEM_jrc-hela':
+        data = imread(dataloc.directory, plugin='tifffile')
+        data_dict = {}
+        for i in range(data.shape[-1]):
+            data_dict[i] = [x for x in data[...,i]]
+        return data_dict
+    
     else:
         if dataloc.fpath:
             return _load_data_fpath(dataloc.fpath)
@@ -161,8 +167,8 @@ class SplitDataset:
         upper_clip: bool - If True, the data is clipped to the max_qval quantile value.
         real_input_fraction: for what fraction of the dataset starting from index 0, should the real input be returned. Otherwise, all zero tensor is returned. 
         """
-        allowed_data_types = ['cifar10','Hagen', 'HT_LIF']
-        assert data_type in allowed_data_types, f"data_type must be one of {allowed_data_types}"
+        # allowed_data_types = ['cifar10','Hagen', 'HT_LIF']
+        # assert data_type in allowed_data_types, f"data_type must be one of {allowed_data_types}"
 
         self._patch_size = patch_size
         self._data_location = data_location

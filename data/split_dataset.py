@@ -28,6 +28,7 @@ def load_data(data_type, dataloc:DataLocation)->Dict[int, List[np.ndarray]]:
         return data_dict
     elif data_type == 'COSEM_jrc-hela':
         data = imread(dataloc.directory, plugin='tifffile')
+        print('Read from', dataloc.directory, data.shape)
         data_dict = {}
         for i in range(data.shape[-1]):
             data_dict[i] = [x for x in data[...,i]]

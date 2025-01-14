@@ -214,7 +214,7 @@ class InDI(GaussianDiffusion):
         # print(actual_t.detach().cpu().numpy())
         # print('---')
         loss = F.mse_loss(predicted_t, actual_t)
-        return loss
+        return loss, predicted_t
     
     def get_prediction_during_training(self, x_in, noise=None, use_superimposed_input=False):
         # we want to make sure that the shape for x_end is the same as x_start.

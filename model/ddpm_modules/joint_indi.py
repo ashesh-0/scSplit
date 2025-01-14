@@ -139,8 +139,8 @@ class JointIndi(nn.Module):
         if self.time_predictor1 is not None:
             assert self.time_predictor2 is not None, "time_predictor2 is not provided."
             # get the loss for the time predictor
-            loss_t1 =self.indi1.time_prediction_loss(pred_dict1['x_clean'].detach(), pred_dict1['t_float'])
-            loss_t2 = self.indi2.time_prediction_loss(pred_dict2['x_clean'].detach(), pred_dict2['t_float'])
+            loss_t1, pred_t1 =self.indi1.time_prediction_loss(pred_dict1['x_clean'].detach(), pred_dict1['t_float'])
+            loss_t2, pred_t2 = self.indi2.time_prediction_loss(pred_dict2['x_clean'].detach(), pred_dict2['t_float'])
 
             loss_t_predictor = (loss_t1 + loss_t2) / 2
 
@@ -162,6 +162,8 @@ class JointIndi(nn.Module):
         self.current_log_dict['scale'] = self.get_scale().item()
         self.current_log_dict['loss_realinput'] = loss_realinput.item() if isinstance(loss_realinput, torch.Tensor) else 0.0
         self.current_log_dict['loss_t_predictor'] = loss_t_predictor.item() if isinstance(loss_t_predictor, torch.Tensor) else 0.0
+        self.current_log_dict['avg_t'] = (pred_t1.mean().item() + pred_t2.mean().item())/2
+        self.current_log_dict['std_t'] = (pred_t1.std().item() + pred_t2.std().item())/2
         # print(loss_splitting.item(), loss_realinput.item(), loss_t_predictor.item())
         return loss_splitting + self.w_input_loss*loss_input + loss_realinput + self.w_t_predictor_loss*loss_t_predictor
     

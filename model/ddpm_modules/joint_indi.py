@@ -139,8 +139,8 @@ class JointIndi(nn.Module):
         if self.time_predictor1 is not None:
             assert self.time_predictor2 is not None, "time_predictor2 is not provided."
             # get the loss for the time predictor
-            loss_t1, pred_t1 =self.indi1.time_prediction_loss(pred_dict1['x_clean'].detach(), pred_dict1['t_float'])
-            loss_t2, pred_t2 = self.indi2.time_prediction_loss(pred_dict2['x_clean'].detach(), pred_dict2['t_float'])
+            loss_t1, pred_t1 =self.indi1.time_prediction_loss(pred_dict1['x_clean'], pred_dict1['t_float'])
+            loss_t2, pred_t2 = self.indi2.time_prediction_loss(pred_dict2['x_clean'], pred_dict2['t_float'])
 
             loss_t_predictor = (loss_t1 + loss_t2) / 2
 

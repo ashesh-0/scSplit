@@ -210,6 +210,9 @@ class InDI(GaussianDiffusion):
 
     def time_prediction_loss(self, x_clean, actual_t):
         predicted_t = self.time_predictor(x_clean)
+        # print(predicted_t.detach().cpu().numpy())
+        # print(actual_t.detach().cpu().numpy())
+        # print('---')
         loss = F.mse_loss(predicted_t, actual_t)
         return loss
     

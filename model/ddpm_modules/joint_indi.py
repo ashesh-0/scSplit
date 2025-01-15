@@ -136,13 +136,18 @@ class JointIndi(nn.Module):
         loss_input = 0.0
         loss_realinput = 0.0
         loss_t_predictor = 0.0
+        loss_t1 = loss_t2 = 0.0
         if self.time_predictor1 is not None:
             assert self.time_predictor2 is not None, "time_predictor2 is not provided."
             # get the loss for the time predictor
-            loss_t1, pred_t1 =self.indi1.time_prediction_loss(pred_dict1['x_clean'], pred_dict1['t_float'])
-            loss_t2, pred_t2 = self.indi2.time_prediction_loss(pred_dict2['x_clean'], pred_dict2['t_float'])
+            t_mask1 = pred_dict1['t_float'] != 0.5 # this is the default value and we don't want to over represent it.
+            if t_mask1.sum() > 0:
+                loss_t1, pred_t1 =self.indi1.time_prediction_loss(pred_dict1['x_clean'][t_mask1], pred_dict1['t_float'][t_mask1])
+            t_mask2 = pred_dict2['t_float'] != 0.5 # this is the default value and we don't want to over represent it.
 
-            loss_t_predictor = (loss_t1 + loss_t2) / 2
+            if t_mask2.sum() > 0:
+                loss_t2, pred_t2 = self.indi2.time_prediction_loss(pred_dict2['x_clean'][t_mask2], pred_dict2['t_float'][t_mask2])
+                loss_t_predictor = (loss_t1 + loss_t2) / 2
 
             # real input is one which is not all zeros. 
             real_input = x_in['input']
@@ -162,8 +167,16 @@ class JointIndi(nn.Module):
         self.current_log_dict['scale'] = self.get_scale().item()
         self.current_log_dict['loss_realinput'] = loss_realinput.item() if isinstance(loss_realinput, torch.Tensor) else 0.0
         self.current_log_dict['loss_t_predictor'] = loss_t_predictor.item() if isinstance(loss_t_predictor, torch.Tensor) else 0.0
-        self.current_log_dict['avg_t'] = (pred_t1.mean().item() + pred_t2.mean().item())/2
-        self.current_log_dict['std_t'] = (pred_t1.std().item() + pred_t2.std().item())/2
+        if t_mask1.sum() > 0 and t_mask2.sum() > 0:
+            self.current_log_dict['avg_t'] = (pred_t1.mean().item() + pred_t2.mean().item())/2
+            self.current_log_dict['std_t'] = (pred_t1.std().item() + pred_t2.std().item())/2
+        elif t_mask1.sum() > 0:
+            self.current_log_dict['avg_t'] = pred_t1.mean().item()
+            self.current_log_dict['std_t'] = pred_t1.std().item()
+        elif t_mask2.sum() > 0:
+            self.current_log_dict['avg_t'] = pred_t2.mean().item()
+            self.current_log_dict['std_t'] = pred_t2.std().item()
+         
         # print(loss_splitting.item(), loss_realinput.item(), loss_t_predictor.item())
         return loss_splitting + self.w_input_loss*loss_input + loss_realinput + self.w_t_predictor_loss*loss_t_predictor
     

@@ -184,7 +184,7 @@ class JointIndi(nn.Module):
                     x_recon_ch2 = unsup_arithmetic_dict['recon_ch2']
                     loss_unsupervised_arithmetic = unsup_arithmetic_dict['loss']
                     loss_realinput = loss_unsupervised_arithmetic
-                    self.current_log_dict['summation_violation_loss'] = unsup_arithmetic_dict['summation_violation_loss'].item()
+                    # self.current_log_dict['summation_violation_loss'] = unsup_arithmetic_dict['summation_violation_loss'].item()
                     self.current_log_dict['arithmetic_ch1_loss'] = unsup_arithmetic_dict['arithmetic_ch1_loss'].item()
                     self.current_log_dict['arithmetic_ch2_loss'] = unsup_arithmetic_dict['arithmetic_ch2_loss'].item()
                 else:

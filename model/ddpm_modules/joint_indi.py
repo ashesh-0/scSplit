@@ -60,6 +60,7 @@ class JointIndi(nn.Module):
         conditional=True,
         schedule_opt=None,
         val_schedule_opt=None,
+        unsupervised_arithmetic=False,
         w_input_loss = 0.0,
         e = 0.01,
         allow_full_translation=False,
@@ -67,6 +68,7 @@ class JointIndi(nn.Module):
         normalize_xt=False,
     ):
         super().__init__()
+        self._enable_unsupervised_arithmetic = unsupervised_arithmetic
         assert denoise_fn_ch1 is not None, "denoise_fn_ch1 is not provided."
         assert denoise_fn_ch2 is not None, "denoise_fn_ch2 is not provided."
         assert denoise_fn is None, "denoise_fn is not needed."
@@ -122,6 +124,29 @@ class JointIndi(nn.Module):
     def get_current_log(self):
         return self.current_log_dict
     
+    def unsupervised_arithmetic(self, x_real):
+        x_recon_ch1, pred_dict1 = self.indi1.get_prediction_during_training({'superimposed_input':x_real}, use_superimposed_input=True)    
+        x_recon_ch2, pred_dict2 = self.indi2.get_prediction_during_training({'superimposed_input':x_real}, use_superimposed_input=True)
+        # the time should sum to 1. this is already enforced by the time predictor.
+        summation_violation_loss = 0.0
+        # summation_violation_loss = nn.MSELoss()(1 - pred_dict1['t_float'] + pred_dict2['t_float'], torch.zeros_like(pred_dict1['t_float']))
+
+        # new input for ch1
+        new_input_ch1 = (x_recon_ch1 + x_real)/2
+        if self.indi1._normalize_xt:
+            new_input_ch1 = self.indi1._xt_normalizer.normalize(new_input_ch1, pred_dict1['t_float'], update=False)
+        arithmetic_ch1_loss = nn.MSELoss()(2*self.indi1.time_predictor(new_input_ch1) - pred_dict1['t_float'], torch.zeros_like(pred_dict1['t_float']))
+
+        # new input for ch2
+        new_input_ch2 = (x_recon_ch2 + x_real)/2
+        if self.indi2._normalize_xt:
+            new_input_ch2 = self.indi2._xt_normalizer.normalize(new_input_ch2, pred_dict2['t_float'], update=False)
+        arithmetic_ch2_loss = nn.MSELoss()(2*self.indi2.time_predictor(new_input_ch2) - (1+pred_dict2['t_float']), torch.zeros_like(pred_dict2['t_float']))
+
+        loss = summation_violation_loss + arithmetic_ch1_loss + arithmetic_ch2_loss
+        return {'loss': loss, 'summation_violation_loss': summation_violation_loss, 'arithmetic_ch1_loss': arithmetic_ch1_loss, 
+                'arithmetic_ch2_loss': arithmetic_ch2_loss,
+                'recon_ch1': x_recon_ch1, 'recon_ch2': x_recon_ch2}
     
     def p_losses(self, x_in, noise=None):
         x_in_ch1 = {'target': x_in['target'][:,0:1], 'input': x_in['target'][:,1:2]}
@@ -153,12 +178,21 @@ class JointIndi(nn.Module):
             real_input = x_in['input']
             valid_mask = ~((real_input ==0).reshape(len(real_input),-1).all(dim=1))
             if valid_mask.sum() > 0:
-                x_recon_ch1,_ = self.indi1.get_prediction_during_training({'superimposed_input':real_input[valid_mask]}, use_superimposed_input=True)    
-                x_recon_ch2,_ = self.indi2.get_prediction_during_training({'superimposed_input':real_input[valid_mask]}, use_superimposed_input=True)
-                
-                loss_ch1_realinput = self.indi1.loss_func(x_in_ch1['target'][valid_mask], x_recon_ch1)
-                loss_ch2_realinput = self.indi2.loss_func(x_in_ch2['target'][valid_mask], x_recon_ch2)
-                loss_realinput = (loss_ch1_realinput + loss_ch2_realinput) / 2
+                if self._enable_unsupervised_arithmetic:
+                    unsup_arithmetic_dict = self.unsupervised_arithmetic(real_input[valid_mask])
+                    x_recon_ch1 = unsup_arithmetic_dict['recon_ch1']
+                    x_recon_ch2 = unsup_arithmetic_dict['recon_ch2']
+                    loss_unsupervised_arithmetic = unsup_arithmetic_dict['loss']
+                    loss_realinput = loss_unsupervised_arithmetic
+                    self.current_log_dict['summation_violation_loss'] = unsup_arithmetic_dict['summation_violation_loss'].item()
+                    self.current_log_dict['arithmetic_ch1_loss'] = unsup_arithmetic_dict['arithmetic_ch1_loss'].item()
+                    self.current_log_dict['arithmetic_ch2_loss'] = unsup_arithmetic_dict['arithmetic_ch2_loss'].item()
+                else:
+                    x_recon_ch1,_ = self.indi1.get_prediction_during_training({'superimposed_input':real_input[valid_mask]}, use_superimposed_input=True)    
+                    x_recon_ch2,_ = self.indi2.get_prediction_during_training({'superimposed_input':real_input[valid_mask]}, use_superimposed_input=True)
+                    loss_ch1_realinput = self.indi1.loss_func(x_in_ch1['target'][valid_mask], x_recon_ch1)
+                    loss_ch2_realinput = self.indi2.loss_func(x_in_ch2['target'][valid_mask], x_recon_ch2)
+                    loss_realinput = (loss_ch1_realinput + loss_ch2_realinput) / 2
 
         # self.current_log_dict['loss_input'] = loss_input.item()
         self.current_log_dict['loss_splitting'] = loss_splitting.item()

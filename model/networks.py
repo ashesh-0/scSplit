@@ -111,6 +111,7 @@ def define_G(opt):
         unet_class = UNetDdpm
         model_kwargs['allow_full_translation'] = model_opt.get('allow_full_translation', False)
         model_kwargs['normalize_xt'] = model_opt.get('normalize_xt', False)
+        model_kwargs['unsupervised_arithmetic'] = model_opt.get('unsupervised_arithmetic', False)
     else:
         raise NotImplementedError(
             'Generator model [{:s}] not recognized'.format(model_opt['which_model_G']))

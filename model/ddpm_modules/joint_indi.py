@@ -134,13 +134,13 @@ class JointIndi(nn.Module):
         # new input for ch1
         new_input_ch1 = (x_recon_ch1 + x_real)/2
         if self.indi1._normalize_xt:
-            new_input_ch1 = self.indi1._xt_normalizer.normalize(new_input_ch1, pred_dict1['t_float'], update=False)
+            new_input_ch1 = self.indi1._xt_normalizer.normalize(new_input_ch1, torch.clip(pred_dict1['t_float'], 0.01, 0.99), update=False)
         arithmetic_ch1_loss = nn.MSELoss()(2*self.indi1.time_predictor(new_input_ch1) - pred_dict1['t_float'], torch.zeros_like(pred_dict1['t_float']))
 
         # new input for ch2
         new_input_ch2 = (x_recon_ch2 + x_real)/2
         if self.indi2._normalize_xt:
-            new_input_ch2 = self.indi2._xt_normalizer.normalize(new_input_ch2, pred_dict2['t_float'], update=False)
+            new_input_ch2 = self.indi2._xt_normalizer.normalize(new_input_ch2, torch.clip(pred_dict2['t_float'], 0.01, 0.99), update=False)
         arithmetic_ch2_loss = nn.MSELoss()(2*self.indi2.time_predictor(new_input_ch2) - (1+pred_dict2['t_float']), torch.zeros_like(pred_dict2['t_float']))
 
         loss = summation_violation_loss + arithmetic_ch1_loss + arithmetic_ch2_loss

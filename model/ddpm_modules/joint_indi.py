@@ -174,12 +174,13 @@ class JointIndi(nn.Module):
             # get the loss for the time predictor
             t_mask1 = pred_dict1['t_float'] != 0.5 # this is the default value and we don't want to over represent it.
             if t_mask1.sum() > 0:
-                loss_t1, pred_t1 =self.indi1.time_prediction_loss(pred_dict1['x_clean'][t_mask1], pred_dict1['t_float'][t_mask1])
+                loss_t1, pred_t1 = self.indi1.time_prediction_loss(pred_dict1['x_clean'][t_mask1], pred_dict1['t_float'][t_mask1])
+                loss_t_predictor += loss_t1/2
             t_mask2 = pred_dict2['t_float'] != 0.5 # this is the default value and we don't want to over represent it.
 
             if t_mask2.sum() > 0:
                 loss_t2, pred_t2 = self.indi2.time_prediction_loss(pred_dict2['x_clean'][t_mask2], pred_dict2['t_float'][t_mask2])
-                loss_t_predictor = (loss_t1 + loss_t2) / 2
+                loss_t_predictor += loss_t2/2
 
             # real input is one which is not all zeros. 
             real_input = x_in['input']

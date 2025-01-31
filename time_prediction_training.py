@@ -15,6 +15,7 @@ import numpy as np
 from core.logger import mkdirs
 import os
 from split import add_git_info
+from model.normalizer import NormalizerXT
 
 
 def get_datasets(opt, tiled_pred=False):
@@ -54,7 +55,7 @@ def get_datasets(opt, tiled_pred=False):
         raise NotImplementedError('Tiled prediction not implemented yet')
 
     val_set = class_obj(data_type, val_data_location, patch_size, target_channel_idx=target_channel_idx,
-                           normalization_dict=train_set.get_normalization_dict(),
+                        #    normalization_dict=train_set.get_normalization_dict(),
                            max_qval=max_qval,
                             upper_clip=upper_clip,
                             channel_weights=channel_weights,
@@ -89,6 +90,9 @@ def start_training(opt):
         )
     model = model.cuda()
 
+    # instantiate the normalizer
+    xt_normalizer = NormalizerXT()
+
     train_loader = DataLoader(train_set, batch_size=opt['datasets']['train']['batch_size'], shuffle=True, num_workers=opt['datasets']['train']['num_workers'])
     val_loader = DataLoader(val_set, batch_size=opt['datasets']['train']['batch_size'], shuffle=False, num_workers=opt['datasets']['train']['num_workers'])
 
@@ -113,13 +117,14 @@ def start_training(opt):
     for epoch in range(num_epochs):
         bar = tqdm(enumerate(train_loader))
         loss_arr = []
-        for i, (x, y) in bar:
+        for i, (x, t_float) in bar:
             model.train()
             optimizer.zero_grad()
             x = x.cuda()
-            y = y.cuda()
-            y_pred = model(x)
-            loss = loss_fn(y_pred, y.type(torch.float32))
+            t_float = t_float.cuda()
+            x = xt_normalizer.normalize(x,t_float, update=True)
+            t_float_pred = model(x)
+            loss = loss_fn(t_float_pred, t_float.type(torch.float32))
             loss.backward()
             loss_arr.append(loss.item())
             bar.set_description(f'Ep:{epoch} loss {np.mean(loss_arr)} val_loss {best_val_loss}')
@@ -132,11 +137,12 @@ def start_training(opt):
         # validation
         model.eval()
         val_losses = []
-        for i, (x, y) in enumerate(val_loader):
+        for i, (x, t_float) in enumerate(val_loader):
             x = x.cuda()
-            y = y.cuda()
-            y_pred = model(x)
-            loss = loss_fn(y_pred, y.type(torch.float32))
+            t_float = t_float.cuda()
+            x = xt_normalizer.normalize(x,t_float, update=True)
+            t_float_pred = model(x)
+            loss = loss_fn(t_float_pred, t_float.type(torch.float32))
             val_losses.append(loss.item())
 
 
@@ -153,7 +159,7 @@ def start_training(opt):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--config', type=str, default='../config/splitting_hagen_time_predictor.json')
+    parser.add_argument('--config', type=str, default='config/splitting_hagen_time_predictor.json')
     parser.add_argument('--rootdir', type=str, default='/group/jug/ashesh/training/diffsplit')
     parser.add_argument('-enable_wandb', action='store_true')
     args = parser.parse_args()

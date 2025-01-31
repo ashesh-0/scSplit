@@ -1,7 +1,6 @@
 from model.ddpm_modules.unet import UNet
 import torch.nn as nn
 import torch
-
 class ForegroundMask(nn.Module):
     def __init__(self, in_channel, out_channel):
         super().__init__()
@@ -19,7 +18,7 @@ class TimePredictor(nn.Module):
         attn_res=(8,),
         res_blocks=3,
         dropout=0,
-        image_size=128
+        image_size=128,
         ):
         super().__init__()
         self.unet = UNet(in_channel=in_channel, 
@@ -32,7 +31,7 @@ class TimePredictor(nn.Module):
                             dropout=dropout,
                             image_size=image_size,
                          with_time_emb=False)
-        
+
         self.foreground_mask = ForegroundMask(in_channel, out_channel)
 
     def forward(self, x):

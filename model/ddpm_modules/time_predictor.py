@@ -19,6 +19,8 @@ class TimePredictor(nn.Module):
         res_blocks=3,
         dropout=0,
         image_size=128,
+        scale_augmentation=False,
+        scale_augmentation_delta=None,
         ):
         super().__init__()
         self.unet = UNet(in_channel=in_channel, 
@@ -33,8 +35,17 @@ class TimePredictor(nn.Module):
                          with_time_emb=False)
 
         self.foreground_mask = ForegroundMask(in_channel, out_channel)
-
+        self._scale_augmentation = scale_augmentation
+        self._scale_augmentation_delta = scale_augmentation_delta
+        
     def forward(self, x):
+        if self._scale_augmentation:
+            # [0, 2*delta]
+            rand = 2* self._scale_augmentation_delta * torch.rand(len(x), device=x.device).reshape(-1, 1,1,1)
+            # [1-delta, 1+delta]
+            rand = rand + 1 - self._scale_augmentation_delta
+            x = x * rand
+        
         out = self.unet(x, None)
         out = nn.functional.relu(out)
         attention = self.foreground_mask(x)

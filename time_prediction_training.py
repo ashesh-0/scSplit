@@ -77,6 +77,12 @@ def start_training(opt):
 
     train_set, val_set = get_datasets(opt, tiled_pred=False)
     model_opt = opt['model']
+    model_kwargs = {}
+    model_kwargs['scale_augmentation'] = model_opt.get('scale_augmentation', False)
+    
+    if model_kwargs['scale_augmentation']:
+        model_kwargs['scale_augmentation_delta'] = model_opt['scale_augmentation_delta']
+    
     model = TimePredictor(
         in_channel=model_opt['unet']['in_channel'],
         out_channel=model_opt['unet']['out_channel'],
@@ -87,6 +93,7 @@ def start_training(opt):
         res_blocks=model_opt['unet']['res_blocks'],
         dropout=model_opt['unet']['dropout'],
         image_size=opt['datasets']['patch_size'],
+        **model_kwargs,
         )
     model = model.cuda()
 

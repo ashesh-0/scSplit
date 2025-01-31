@@ -23,11 +23,6 @@ from data.split_dataset import SplitDataset, compute_normalization_dict, DataLoc
 
 class TimePredictorDataset(SplitDataset):
     def __init__(self, *args, **kwargs):
-        if 'step_size' in kwargs:
-            step_size = kwargs.pop('step_size')
-        else:
-            step_size = 0.05
-        
         if 'gaussian_noise_std_factor' in kwargs:
             self._gaussian_noise_std_factor = kwargs.pop('gaussian_noise_std_factor')
         else:

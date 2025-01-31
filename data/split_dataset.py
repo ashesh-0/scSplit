@@ -35,10 +35,11 @@ def load_data(data_type, dataloc:DataLocation)->Dict[int, List[np.ndarray]]:
         return data_dict
     
     else:
+        assert data_type == "Hagen", "Only Hagen data is supported"
         if dataloc.fpath:
             return _load_data_fpath(dataloc.fpath)
         elif len(dataloc.channelwise_fpath) > 0:
-            return _load_data_channelwise_fpath(dataloc.channelwise_fpath)
+            return _load_data_channelwise_fpath_hagen(dataloc.channelwise_fpath)
 
 def compute_mean_stdev_based_normalization(data_dict, patch_size:int, numC:int, num_patches=10000):
     output = {
@@ -123,7 +124,7 @@ def compute_normalization_dict(data_dict, channel_weights:List[float], numC:int,
         return output_dict
 
 
-def _load_data_channelwise_fpath(fpaths:Tuple[str])-> Dict[int, List[np.ndarray]]:
+def _load_data_channelwise_fpath_hagen(fpaths:Tuple[str])-> Dict[int, List[np.ndarray]]:
     assert len(fpaths) == 2, "Only two channelwise fpaths are supported"
     data_ch0 = imread(fpaths[0], plugin='tifffile')
     data_ch1 = imread(fpaths[1], plugin='tifffile')
@@ -152,7 +153,8 @@ class SplitDataset:
                  channel_weights=None,
                  input_from_normalized_target=False,
                  real_input_fraction=None,
-                 upper_clip=False):
+                 upper_clip=False,
+                 normalize_channels=True):
         """
         Args:
         data_type: str - 'cifar10' or 'Hagen'
@@ -175,6 +177,7 @@ class SplitDataset:
         self._data_location = data_location
         self._channel_weights = channel_weights
         self._input_from_normalized_target = input_from_normalized_target
+        self._normalize_channels = normalize_channels
         if self._channel_weights is None:
             self._channel_weights = [1,1]
         # channel_idx is the key. value is list of full sized frames.
@@ -353,7 +356,10 @@ class SplitDataset:
 
 
         target = np.concatenate(patch_arr, axis=0)
-        target = self.normalize_channels(target)    
+        
+        if self._normalize_channels:
+            target = self.normalize_channels(target)
+        
         real_input = None
         if self._input_channel_idx is not None:
             if self._real_input_fraction is None or frame_idx <= self.frames_with_real_input():

@@ -37,6 +37,10 @@ class TimePredictor(nn.Module):
         self.foreground_mask = ForegroundMask(in_channel, out_channel)
         self._scale_augmentation = scale_augmentation
         self._scale_augmentation_delta = scale_augmentation_delta
+        msg = f'{self.__class__.__name__}'
+        if self._scale_augmentation:
+            msg += f' with scale augmentation delta {self._scale_augmentation_delta}'
+        print(msg)
         
     def forward(self, x):
         if self._scale_augmentation:

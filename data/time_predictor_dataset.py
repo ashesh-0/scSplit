@@ -29,14 +29,27 @@ class TimePredictorDataset(SplitDataset):
             self._gaussian_noise_std_factor = None
         super(TimePredictorDataset, self).__init__(*args, **kwargs)
         self._num_timesteps = 100
+        self._fixed_t = None
         # self.input_normalization_dict = compute_input_normalization_dict(self._data_dict, self._num_timesteps, self._mean_target, self._std_target)
         # self.normalizer = Normalizer(self._data_dict, self._max_qval, step_size= step_size)
         if self._gaussian_noise_std_factor is not None:
             print("Adding Gaussian noise with std factor: ", self._gaussian_noise_std_factor)
-        
+
+    def reset_fixed_t(self):
+        self._fixed_t = None
+    
+    def set_fixed_t(self, t_value:float):
+        self._fixed_t = t_value
+        assert self._fixed_t >= 0 and self._fixed_t < 1, "Fixed t must be between 0 and 1"
+
     def sample_t(self):
-        t_int = np.random.randint(0, self._num_timesteps)
-        return t_int/self._num_timesteps, t_int
+        if self._fixed_t is not None:
+            t = self._fixed_t
+        else:
+            t = np.random.rand()
+        
+        t_int = int(t*self._num_timesteps)
+        return t, t_int
 
     # def min_max_normalize(self, img, t_int):
     #     t_min, t_max = self.input_normalization_dict[t_int]

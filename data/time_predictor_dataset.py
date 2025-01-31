@@ -91,22 +91,24 @@ if __name__ == "__main__":
     # patch_size = 512
     # data_type = 'hagen'
     # data_location = DataLocation(directory='/group/jug/ashesh/data/cifar-10-python/train')
-    patch_size = 512
+    patch_size = 256
     data_type = 'Hagen'
     nC = 1 if data_type == 'Hagen' else 3
     channel_weights = [1,1.0]
     dataset = TimePredictorDataset(data_type, data_location, patch_size, 
-                                max_qval=0.98, upper_clip=True,
-                             normalization_dict=None, enable_transforms=False,
-                             channel_weights=channel_weights,
-                             uncorrelated_channels=False, random_patching=False,
-                             step_size=0.25)
+                             target_channel_idx=None, 
+                                max_qval=None, upper_clip=False,
+                                uncorrelated_channels=False,
+                                channel_weights=channel_weights,
+                             normalization_dict=None, enable_transforms=False,random_patching=False,
+                             gaussian_noise_std_factor=0.1)
+    
     for i in range(len(dataset)):
         img, t = dataset[i]
         if img.max() > 0:
             print(img.min(),img.max(), t)
     
     print(len(dataset))
-    img, t = dataset[10]
+    img, t = dataset[100]
     plt.imshow(img[0])
     print(t)

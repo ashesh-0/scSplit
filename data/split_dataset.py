@@ -20,7 +20,7 @@ class DataLocation:
 def load_data(data_type, dataloc:DataLocation)->Dict[int, List[np.ndarray]]:
     if data_type == 'cifar10':
         return load_cifar10_data(dataloc.directory, [1,7])
-    elif data_type == 'HT_LIF':
+    elif data_type == 'HT_LIF24':
         data_arr = load_HT_LIF_data(dataloc.directory)
         data_dict = {}
         for i in range(data_arr.shape[-1]):

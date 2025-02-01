@@ -1,0 +1,78 @@
+{
+    "name": "splitting",
+    "phase": "train", // train or val
+    "gpu_ids": [
+        0
+    ],
+    "path": { //set the path
+        "root": "/group/jug/ashesh/training/diffSplit/",
+        "log": "logs",
+        "tb_logger": "tb_logger",
+        "results": "results",
+        "checkpoint": "checkpoint",
+        "resume_state": null
+        // "resume_state": "experiments/distributed_high_sr_ffhq_210901_121212/checkpoint/I830000_E32" //pretrain model or training state
+    },
+    "datasets": {
+        "upper_clip": false,
+        "patch_size": 256,
+        "max_qval": 1.0,
+        "channel_weights": [1.0, 1.0],
+        "train": {
+            "name": "HT_LIF24",
+            "datapath": "/group/jug/ashesh/data/diffsplit_HT_LIF/500ms/Ch_B-Ch_D-Ch_BD/train/",
+            "datatype": "img", //lmdb or img, path of img files
+            "batch_size": 16,
+            "num_workers": 4,
+            "use_shuffle": true,
+            "uncorrelated_channels": false,
+            "gaussian_noise_std_factor": 0.05
+        },
+        "val": {
+            "name": "HT_LIF24",
+            "datapath": "/group/jug/ashesh/data/diffsplit_HT_LIF/500ms/Ch_B-Ch_D-Ch_BD/val/",
+            "patch_size": 256,
+            "datatype": "img" //lmdb or img, path of img files
+        }
+    },
+    "model": {
+        "loss_type": "l2", // TODO: this is not used now, but will be used in future to test mutliple loss functions
+        "lr_reduction": "mean",
+        "finetune_norm": false,
+        "which_model_G": "UnetClassifier",
+        "scale_augmentation": true,
+        "scale_augmentation_delta": 0.05,
+        "unet": {
+            "in_channel": 1, // target channel + input channel. it is so because the noise of the shape target is concatenated with the input
+            "out_channel": 1,
+            "inner_channel": 16,
+            "norm_groups": 16,
+            "channel_multiplier": [
+                1,
+                2,
+                4,
+                8
+                // 8,
+                // 16,
+                // 16
+            ],
+            "attn_res": [
+                // 16
+            ],
+            "res_blocks": 1,
+            "dropout": 0.2
+        }
+    },
+    "train": {
+        "num_epochs": 2000,
+        "optimizer": {
+            "type": "adam",
+            "lr": 1e-3
+            
+        },
+        "lr_scheduler_patience":15
+    },
+    "wandb": {
+        "project": "DiffSplit"
+    }
+}

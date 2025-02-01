@@ -48,6 +48,8 @@
         "lr_reduction": "mean",
         "finetune_norm": false,
         "which_model_G": "UnetClassifier",
+        "scale_augmentation": true,
+        "scale_augmentation_delta": 0.05,
         "unet": {
             "in_channel": 1, // target channel + input channel. it is so because the noise of the shape target is concatenated with the input
             "out_channel": 1,

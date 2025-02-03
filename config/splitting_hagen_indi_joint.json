@@ -16,7 +16,7 @@
     "datasets": {
         "upper_clip": false,
         "patch_size": 256,
-        "max_qval": 0.995,
+        "max_qval": 1.0,
         // "channel_weights": [1.0, 1.0],
         "train": {
             "name": "Hagen",
@@ -26,7 +26,7 @@
             },
             "datatype": "img", //lmdb or img, path of img files
             "batch_size": 4,
-            "num_workers": 2,
+            "num_workers": 4,
             "use_shuffle": true,
             "uncorrelated_channels": false
         },
@@ -46,8 +46,11 @@
         "loss_type": "l1", // TODO: this is not used now, but will be used in future to test mutliple loss functions
         "w_input_loss": 0.1,
         "lr_reduction": "mean",
+        "unsupervised_arithmetic": false,
+        "normalize_xt": true,
         "finetune_norm": false,
-        "allow_full_translation": true,
+        "allow_full_translation": true, // t is sampled between [0,1] if this is True.
+        "enable_time_predictor": false,
         "unet": {
             "in_channel": 1, // target channel + input channel. it is so because the noise of the shape target is concatenated with the input
             "out_channel": 1,
@@ -57,16 +60,16 @@
                 1,
                 2,
                 4,
-                8,
-                8,
-                16,
-                16
+                8
+                // 8
+                // 16,
+                // 16
             ],
             "attn_res": [
-                16
+                // 16
             ],
             "res_blocks": 1,
-            "dropout": 0
+            "dropout": 0.1
         },
         "beta_schedule": { // use munual beta_schedule for acceleration
             "train": {

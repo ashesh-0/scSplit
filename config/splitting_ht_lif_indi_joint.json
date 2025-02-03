@@ -20,7 +20,7 @@
         "input_channel_idx": 2,
         // "channel_weights": [1.0, 1.0],
         "train": {
-            "name": "HT_LIF",
+            "name": "HT_LIF24",
             "datapath": "/group/jug/ashesh/data/diffsplit_HT_LIF/500ms/Ch_B-Ch_D-Ch_BD/train/",
             "datatype": "img", //lmdb or img, path of img files
             "real_input_fraction": 0.01,
@@ -30,7 +30,7 @@
             "uncorrelated_channels": false
         },
         "val": {
-            "name": "HT_LIF",
+            "name": "HT_LIF24",
             // "target_channel_idx": 0, // If set then we do image translation from input to this channel 
             "datapath": "/group/jug/ashesh/data/diffsplit_HT_LIF/500ms/Ch_B-Ch_D-Ch_BD/val/",
             "patch_size": 256,
@@ -42,10 +42,11 @@
         "loss_type": "l1", // TODO: this is not used now, but will be used in future to test mutliple loss functions
         "w_input_loss": 0.1,
         "lr_reduction": "mean",
+        "unsupervised_arithmetic": false,
         "normalize_xt": true,
         "finetune_norm": false,
-        "allow_full_translation": true,
-        "enable_time_predictor": true,
+        "allow_full_translation": true, // t is sampled between [0,1] if this is True.
+        "enable_time_predictor": false,
         "unet": {
             "in_channel": 1, // target channel + input channel. it is so because the noise of the shape target is concatenated with the input
             "out_channel": 1,
@@ -64,7 +65,7 @@
                 // 16
             ],
             "res_blocks": 1,
-            "dropout": 0
+            "dropout": 0.1
         },
         "beta_schedule": { // use munual beta_schedule for acceleration
             "train": {

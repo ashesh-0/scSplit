@@ -37,7 +37,7 @@ def get_datasets(opt, tiled_pred=False):
 
     data_type = opt['datasets']['train']['name']  
     uncorrelated_channels = opt['datasets']['train']['uncorrelated_channels']
-    allowed_dsets = ['cifar10', 'Hagen', "RRW", "HT_LIF", "COSEM_jrc-hela"]
+    allowed_dsets = ['cifar10', 'Hagen', "RRW", "HT_LIF24", "COSEM_jrc-hela"]
     assert data_type in allowed_dsets, f"Only one of {allowed_dsets} datasets are supported. Found {data_type}"
     if data_type == 'RRW':
         rootdir = opt['datasets']['datapath']
@@ -57,7 +57,7 @@ def get_datasets(opt, tiled_pred=False):
                                                             opt['datasets']['train']['datapath']['ch1']))
             val_data_location = DataLocation(channelwise_fpath=(opt['datasets']['val']['datapath']['ch0'],
                                                             opt['datasets']['val']['datapath']['ch1']))
-        elif data_type in ['cifar10', 'HT_LIF', 'COSEM_jrc-hela']:
+        elif data_type in ['cifar10', 'HT_LIF24', 'COSEM_jrc-hela']:
             train_data_location = DataLocation(directory=(opt['datasets']['train']['datapath']))
             val_data_location = DataLocation(directory=(opt['datasets']['val']['datapath']))
             extra_kwargs['input_channel_idx'] = opt['datasets']['input_channel_idx'] if 'input_channel_idx' in opt['datasets'] else None

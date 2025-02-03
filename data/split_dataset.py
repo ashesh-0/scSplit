@@ -373,7 +373,7 @@ class SplitDataset:
             target = target[target_mask.astype(bool)]
 
         assert self._target_channel_idx is None
-        return {'target':target, 'input':real_input}
+        return {'target':target, 'input':real_input if real_input is not None else 0.0}
     
 
 if __name__ == "__main__":

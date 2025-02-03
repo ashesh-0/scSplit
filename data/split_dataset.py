@@ -361,14 +361,14 @@ class SplitDataset:
             target = self.normalize_channels(target)
         
         real_input = None
-        
-        if self._input_channel_idx is not None and self._real_input_fraction > 0:
+        if self._input_channel_idx is not None and (self._real_input_fraction is not None and self._real_input_fraction > 0):
             if self._real_input_fraction is None or frame_idx <= self.frames_with_real_input():
                 # for the initial real_input_fraction dataset, real input is returned.
                 real_input = target[self._input_channel_idx:self._input_channel_idx+1]
             else:
                 real_input = np.zeros_like(target[self._input_channel_idx:self._input_channel_idx+1])
-            
+        
+        if self._input_channel_idx is not None:
             target_mask = np.ones(self._numC)
             target_mask[self._input_channel_idx] = 0
             target = target[target_mask.astype(bool)]

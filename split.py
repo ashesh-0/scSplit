@@ -220,11 +220,11 @@ if __name__ == "__main__":
                         assert input.shape[0] == 1
                         assert target.shape[0] == 1
                         assert prediction.shape[0] == 1
-                        input_img = ((input * std_input + mean_input)/2).astype(np.uint16)
+                        # input_img = ((input * std_input + mean_input)/2).astype(np.uint16)
                         target_img = (target * std_target + mean_target).astype(np.uint16)
                         pred_img = (prediction * std_target + mean_target)
                         
-                        input_img = input_img[0]
+                        # input_img = input_img[0]
                         target_img = target_img[0]
                         pred_img = pred_img[0]
 
@@ -249,9 +249,9 @@ if __name__ == "__main__":
                             maxv = target_img.reshape(target_img.shape[0],-1).max(axis=1).reshape(-1,1,1)
                             target_img = target_img / maxv
 
-                            input_img = input_img - input_img.min()
-                            max_val_input = input_img.reshape(input_img.shape[0],-1).max(axis=1).reshape(-1,1,1)
-                            input_img = input_img / max_val_input
+                            # input_img = input_img - input_img.min()
+                            # max_val_input = input_img.reshape(input_img.shape[0],-1).max(axis=1).reshape(-1,1,1)
+                            # input_img = input_img / max_val_input
 
                             pred_img = pred_img - minv
                             pred_img = pred_img / maxv
@@ -263,8 +263,8 @@ if __name__ == "__main__":
                         # generation
                         Metrics.save_img(
                             target_img, '{}/{}_{}_target.png'.format(result_path, current_step, idx), mode=mode)
-                        Metrics.save_img(
-                            input_img, '{}/{}_{}_input.png'.format(result_path, current_step, idx), mode=mode)
+                        # Metrics.save_img(
+                        #     input_img, '{}/{}_{}_input.png'.format(result_path, current_step, idx), mode=mode)
                         Metrics.save_img(pred_img, '{}/{}_{}_pred.png'.format(result_path, current_step, idx), mode=mode)
 
 

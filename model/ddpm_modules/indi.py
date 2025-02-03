@@ -86,7 +86,8 @@ class InDI(GaussianDiffusion):
         sample_inter = (1 | (num_timesteps//20))
         assert self.conditional is False
         b = x_in.shape[0]
-
+        assert x_in.shape[1] == 1, "Only one channel is supported."
+        
         factor = self.out_channel // x_in.shape[1]
         x_in = torch.cat([x_in]*factor, dim=1)
         

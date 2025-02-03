@@ -50,7 +50,7 @@ def get_datasets(opt, tiled_pred=False):
         val_set = RRWDataset(datapath, val_fpath, crop_size=patch_size, fix_sample_A=nimgs, regular_aug=False)
         return train_set, val_set
     else:
-        extra_kwargs = {}
+        extra_kwargs = {'normalize_channels':True}
         train_kwargs = {}
         if data_type == 'Hagen':
             train_data_location = DataLocation(channelwise_fpath=(opt['datasets']['train']['datapath']['ch0'],

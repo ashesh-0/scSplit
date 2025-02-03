@@ -158,7 +158,6 @@ class JointIndi(nn.Module):
     def p_losses(self, x_in, noise=None):
         x_in_ch1 = {'target': x_in['target'][:,0:1], 'input': x_in['target'][:,1:2]}
         x_in_ch2 = {'target': x_in['target'][:,1:2], 'input': x_in['target'][:,0:1]}
-
         x_recon_ch1, pred_dict1 = self.indi1.get_prediction_during_training(x_in_ch1, noise=noise)    
         x_recon_ch2, pred_dict2 = self.indi2.get_prediction_during_training(x_in_ch2, noise=noise)
 
@@ -244,6 +243,8 @@ class JointIndi(nn.Module):
         ch2 = self.indi2.inference(x_in, continuous=continuous, num_timesteps=num_timesteps, t_float_start=t_float_start_ch2, eps=eps)
         return torch.cat([ch1, ch2], dim=1)
 
+    def get_xt_clean(self, x_start, x_end, t:float, update=True):
+        return self.indi1.get_xt_clean(x_start, x_end, t, update=update), self.indi2.get_xt_clean(x_start, x_end, 1-t, update=update)
 
     def forward(self, x, *args, **kwargs):
         return self.p_losses(x, *args, **kwargs)

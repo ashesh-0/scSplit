@@ -86,6 +86,7 @@ class InDI(GaussianDiffusion):
         sample_inter = (1 | (num_timesteps//20))
         assert self.conditional is False
         b = x_in.shape[0]
+
         factor = self.out_channel // x_in.shape[1]
         x_in = torch.cat([x_in]*factor, dim=1)
         
@@ -128,7 +129,12 @@ class InDI(GaussianDiffusion):
         mean_val, std_val = self._normalizer_xt.get_params(t_bin)
         return (x_t - mean_val) / std_val
 
-    def get_xt_clean(self, x_start, x_end, t:float):
+    def get_xt_clean(self, x_start, x_end, t:float, update=True):
+        """
+        Returns an estimate of the superimposed input at time t.
+        Essentially, this is the interpolation between x_start and x_end at time t.
+        Optionally, it can normalize the output as well.
+        """
         assert 0 < t.min(), "t > 0"
         assert t.max() <= 1, "t <= 1. but t is {}".format(t.max())
 
@@ -139,7 +145,7 @@ class InDI(GaussianDiffusion):
 
         # normalization
         if self._normalize_xt:
-            x_t_clean = self._xt_normalizer.normalize(x_t_clean, t, update=True)
+            x_t_clean = self._xt_normalizer.normalize(x_t_clean, t, update=update)
         return x_t_clean
     
         

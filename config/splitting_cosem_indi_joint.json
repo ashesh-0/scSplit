@@ -16,14 +16,14 @@
     "datasets": {
         "upper_clip": false,
         "patch_size": 256,
-        "max_qval": 0.995,
+        "max_qval": 1.0,
         "input_channel_idx": 2,
         // "channel_weights": [1.0, 1.0],
         "train": {
             "name": "COSEM_jrc-hela",
             "datapath": "/group/jug/ashesh/bleedthroughsimulation/jrc_hela-3/train-val-test-split/train_jrc_hela-3_bleedthrough_EGFP_Venus_R3.0_S4_D1_Ex100.0ms.tif",
             "datatype": "img", //lmdb or img, path of img files
-            "real_input_fraction": 0.1,
+            "real_input_fraction": 0.0,
             "batch_size": 12,
             "num_workers": 4,
             "use_shuffle": true,
@@ -42,11 +42,11 @@
         "loss_type": "l1", // TODO: this is not used now, but will be used in future to test mutliple loss functions
         "w_input_loss": 0.1,
         "lr_reduction": "mean",
-        "unsupervised_arithmetic": true,
+        "unsupervised_arithmetic": false,
         "normalize_xt": true,
         "finetune_norm": false,
         "allow_full_translation": true, // t is sampled between [0,1] if this is True.
-        "enable_time_predictor": true,
+        "enable_time_predictor": false,
         "unet": {
             "in_channel": 1, // target channel + input channel. it is so because the noise of the shape target is concatenated with the input
             "out_channel": 1,
@@ -65,7 +65,7 @@
                 // 16
             ],
             "res_blocks": 1,
-            "dropout": 0
+            "dropout": 0.1
         },
         "beta_schedule": { // use munual beta_schedule for acceleration
             "train": {

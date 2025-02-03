@@ -105,13 +105,15 @@ def define_G(opt):
     elif model_opt['which_model_G'] == 'indi':
         netG_class = InDI
         unet_class = UNetDdpm
-        model_kwargs['normalize_xt'] = model_opt.get('normalize_xt', False)
+        # model_kwargs['normalize_xt'] = model_opt.get('normalize_xt', False)
     elif model_opt['which_model_G'] == 'joint_indi':
         netG_class = JointIndi
         unet_class = UNetDdpm
         model_kwargs['allow_full_translation'] = model_opt.get('allow_full_translation', False)
-        model_kwargs['normalize_xt'] = model_opt.get('normalize_xt', False)
+        # model_kwargs['normalize_xt'] = model_opt.get('normalize_xt', False)
         model_kwargs['unsupervised_arithmetic'] = model_opt.get('unsupervised_arithmetic', False)
+        model_kwargs['xt_normalizer_1'] = model_opt.get('xt_normalizer_1', None)
+        model_kwargs['xt_normalizer_2'] = model_opt.get('xt_normalizer_2', None)
     else:
         raise NotImplementedError(
             'Generator model [{:s}] not recognized'.format(model_opt['which_model_G']))

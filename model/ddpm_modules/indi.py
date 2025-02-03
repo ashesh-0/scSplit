@@ -26,7 +26,7 @@ class InDI(GaussianDiffusion):
         val_schedule_opt=None,
         e = 0.01,
         time_predictor=None,
-        normalize_xt=False,
+        xt_normalizer=False,
     ):
         super().__init__(denoise_fn, image_size, channels=channels, loss_type=loss_type, conditional=conditional, 
                          lr_reduction=lr_reduction,
@@ -45,10 +45,8 @@ class InDI(GaussianDiffusion):
         
         self.val_num_timesteps = val_schedule_opt['n_timestep']
         self.time_predictor = time_predictor
-        self._normalize_xt = normalize_xt
-        if self._normalize_xt:
-            self._xt_normalizer = NormalizerXT(num_bins=100)
-        
+        self._xt_normalizer = xt_normalizer
+        self._normalize_xt = self._xt_normalizer is not None
         msg = f'Sampling mode: {self._t_sampling_mode}, Noise mode: {self._noise_mode}'
         print(f'[{self.__class__.__name__}]: {msg}')
 
@@ -87,7 +85,7 @@ class InDI(GaussianDiffusion):
         assert self.conditional is False
         b = x_in.shape[0]
         assert x_in.shape[1] == 1, "Only one channel is supported."
-        
+
         factor = self.out_channel // x_in.shape[1]
         x_in = torch.cat([x_in]*factor, dim=1)
         
@@ -143,7 +141,6 @@ class InDI(GaussianDiffusion):
             t = t.reshape(-1, 1, 1, 1)
 
         x_t_clean = (1-t)*x_start + t*x_end
-
         # normalization
         if self._normalize_xt:
             x_t_clean = self._xt_normalizer.normalize(x_t_clean, t, update=update)

@@ -6,7 +6,7 @@ class NormalizerXT(nn.Module):
     """
     A class which returns the normalization parameters for x_t.
     """
-    def __init__(self, data_mean=None, data_std=None, num_bins=100, stop_update_count=1e6):
+    def __init__(self, data_mean=None, data_std=None, data_count=None, num_bins=100, stop_update_count=1e6):
         super().__init__()
         self.data_mean_fixed = data_mean
         self.data_std_fixed = data_std
@@ -21,10 +21,10 @@ class NormalizerXT(nn.Module):
         else:
             self.register_buffer("data_mean",torch.Tensor(self.data_mean_fixed).cuda())
             self.register_buffer("data_std",torch.Tensor(self.data_std_fixed).cuda())
-            self.register_buffer("count",torch.Tensor([stop_update_count]*num_bins))
+            self.register_buffer("count",torch.Tensor([data_count]*num_bins))
 
     def update(self, x_t, t):
-        assert self.data_mean_fixed is None, "update() should not be called when data_mean is fixed."
+        # assert self.data_mean_fixed is None, "update() should not be called when data_mean is fixed."
 
         for batch_idx in range(x_t.shape[0]):
             t_bin = int(t[batch_idx].item()*self.num_bins)

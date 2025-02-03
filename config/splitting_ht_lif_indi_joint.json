@@ -16,7 +16,7 @@
     "datasets": {
         "upper_clip": false,
         "patch_size": 256,
-        "max_qval": 0.995,
+        "max_qval": 1.0,
         "input_channel_idx": 2,
         // "channel_weights": [1.0, 1.0],
         "train": {

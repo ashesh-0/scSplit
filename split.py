@@ -13,6 +13,8 @@ from data.split_dataset_tiledpred import SplitDatasetTiledPred
 from core.psnr import PSNR
 from collections import defaultdict
 from predtiler.dataset import get_tiling_dataset, get_tile_manager
+from model.normalizer import NormalizerXT
+
 # from tensorboardX import SummaryWriter
 import os
 import numpy as np
@@ -50,7 +52,7 @@ def get_datasets(opt, tiled_pred=False):
         val_set = RRWDataset(datapath, val_fpath, crop_size=patch_size, fix_sample_A=nimgs, regular_aug=False)
         return train_set, val_set
     else:
-        extra_kwargs = {'normalize_channels':True}
+        extra_kwargs = {'normalize_channels':False}
         train_kwargs = {}
         if data_type == 'Hagen':
             train_data_location = DataLocation(channelwise_fpath=(opt['datasets']['train']['datapath']['ch0'],
@@ -146,14 +148,36 @@ if __name__ == "__main__":
 
 
     train_set, val_set = get_datasets(opt)
-    train_loader = Data.create_dataloader(train_set, opt['datasets']['train'], 'train')
-    val_loader = Data.create_dataloader(val_set, opt['datasets']['val'], 'val')
-
     logger.info('Initial Dataset Finished')
+    
+    # 
+    # train the normalizer.  
+    num_bins = 100
+    xt_normalizer1 = NormalizerXT(num_bins=num_bins)
+    xt_normalizer2 = NormalizerXT(num_bins=num_bins)
+    from tqdm import tqdm
+    for _ in range(1):
+        train_loader = Data.create_dataloader(train_set, opt['datasets']['train'], 'train')
+        bar = tqdm(train_loader)
+        for data in bar:
+            ch1 = data['target'][:,0:1].cuda()
+            ch2 = data['target'][:,1:2].cuda()
+            t_float_arr = torch.Tensor(np.random.rand(ch1.shape[0], num_bins)).cuda()
+            for i in range(t_float_arr.shape[1]):
+                inp = ch1* t_float_arr[:,i].reshape(-1,1,1,1) + ch2 * (1-t_float_arr[:,i]).reshape(-1,1,1,1)
+                xt_normalizer1.normalize(inp, t_float_arr[:,i], update=True)
+                xt_normalizer2.normalize(inp, 1-t_float_arr[:,i], update=True)
+            
 
+    opt['model']['xt_normalizer_1'] = xt_normalizer1
+    opt['model']['xt_normalizer_2'] = xt_normalizer2
     # model
     diffusion = Model.create_model(opt)
     logger.info('Initial Model Finished')
+
+
+    train_loader = Data.create_dataloader(train_set, opt['datasets']['train'], 'train')
+    val_loader = Data.create_dataloader(val_set, opt['datasets']['val'], 'val')
 
     # Train
     current_step = diffusion.begin_step

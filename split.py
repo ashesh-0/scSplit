@@ -167,7 +167,6 @@ if __name__ == "__main__":
                 inp = ch1* t_float_arr[:,i].reshape(-1,1,1,1) + ch2 * (1-t_float_arr[:,i]).reshape(-1,1,1,1)
                 xt_normalizer1.normalize(inp, t_float_arr[:,i], update=True)
                 xt_normalizer2.normalize(inp, 1-t_float_arr[:,i], update=True)
-            
 
     opt['model']['xt_normalizer_1'] = xt_normalizer1
     opt['model']['xt_normalizer_2'] = xt_normalizer2

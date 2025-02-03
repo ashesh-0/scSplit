@@ -47,6 +47,7 @@ class InDI(GaussianDiffusion):
         self.time_predictor = time_predictor
         self._xt_normalizer = xt_normalizer
         self._normalize_xt = self._xt_normalizer is not None
+
         msg = f'Sampling mode: {self._t_sampling_mode}, Noise mode: {self._noise_mode}'
         print(f'[{self.__class__.__name__}]: {msg}')
 
@@ -123,10 +124,9 @@ class InDI(GaussianDiffusion):
     def interpolate(self, x1, x2, t=None, lam=0.5):
         raise NotImplementedError("This is not needed.")
     
-    def normalize_xt(self, x_t, t):
-        t_bin = int(t*self._normalize_xt_num_bins)
-        mean_val, std_val = self._normalizer_xt.get_params(t_bin)
-        return (x_t - mean_val) / std_val
+    def normalize_xt(self, x_t, t, update=True):
+        return self._xt_normalizer.normalize(x_t, t, update=update)
+    
 
     def get_xt_clean(self, x_start, x_end, t:float, update=True):
         """

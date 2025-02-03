@@ -162,9 +162,12 @@ class JointIndi(nn.Module):
         x_in_ch2 = {'target': x_in['target'][:,1:2], 'input': x_in['target'][:,0:1]}
         x_recon_ch1, pred_dict1 = self.indi1.get_prediction_during_training(x_in_ch1, noise=noise)    
         x_recon_ch2, pred_dict2 = self.indi2.get_prediction_during_training(x_in_ch2, noise=noise)
-
-        loss_ch1 = self.indi1.loss_func(x_in_ch1['target'], x_recon_ch1)
-        loss_ch2 = self.indi2.loss_func(x_in_ch2['target'], x_recon_ch2)
+        device = x_in['target'].device
+        tar1_norm = self.indi1.normalize_xt(x_in_ch1['target'], torch.Tensor([0.001]*len(x_in_ch1['target'])).to(device))
+        tar2_norm = self.indi1.normalize_xt(x_in_ch2['target'], torch.Tensor([0.999]*len(x_in_ch2['target'])).to(device))
+        
+        loss_ch1 = self.indi1.loss_func(tar1_norm, x_recon_ch1)
+        loss_ch2 = self.indi2.loss_func(tar2_norm, x_recon_ch2)
         loss_splitting = (loss_ch1 + loss_ch2) / 2
         loss_input = 0.0
         loss_realinput = 0.0

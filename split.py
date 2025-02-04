@@ -115,7 +115,7 @@ def get_xt_normalizer(train_set,train_opt, num_bins=100 ):
                 inp = ch1* t_float_arr[:,i].reshape(-1,1,1,1) + ch2 * (1-t_float_arr[:,i]).reshape(-1,1,1,1)
                 xt_normalizer1.normalize(inp, t_float_arr[:,i], update=True)
                 xt_normalizer2.normalize(inp, 1-t_float_arr[:,i], update=True)
-            break
+    
     return xt_normalizer1, xt_normalizer2
 
 if __name__ == "__main__":

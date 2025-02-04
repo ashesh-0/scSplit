@@ -100,6 +100,23 @@ def get_datasets(opt, tiled_pred=False):
                             **extra_kwargs)
         return train_set, val_set
 
+def get_xt_normalizer(train_set,train_opt, num_bins=100 ):
+    xt_normalizer1 = NormalizerXT(num_bins=num_bins)
+    xt_normalizer2 = NormalizerXT(num_bins=num_bins)
+    from tqdm import tqdm
+    for _ in range(1):
+        train_loader = Data.create_dataloader(train_set, train_opt, 'train')
+        bar = tqdm(train_loader)
+        for data in bar:
+            ch1 = data['target'][:,0:1].cuda()
+            ch2 = data['target'][:,1:2].cuda()
+            t_float_arr = torch.Tensor(np.random.rand(ch1.shape[0], num_bins)).cuda()
+            for i in range(t_float_arr.shape[1]):
+                inp = ch1* t_float_arr[:,i].reshape(-1,1,1,1) + ch2 * (1-t_float_arr[:,i]).reshape(-1,1,1,1)
+                xt_normalizer1.normalize(inp, t_float_arr[:,i], update=True)
+                xt_normalizer2.normalize(inp, 1-t_float_arr[:,i], update=True)
+            break
+    return xt_normalizer1, xt_normalizer2
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -152,21 +169,7 @@ if __name__ == "__main__":
     
     # 
     # train the normalizer.  
-    num_bins = 100
-    xt_normalizer1 = NormalizerXT(num_bins=num_bins)
-    xt_normalizer2 = NormalizerXT(num_bins=num_bins)
-    from tqdm import tqdm
-    for _ in range(1):
-        train_loader = Data.create_dataloader(train_set, opt['datasets']['train'], 'train')
-        bar = tqdm(train_loader)
-        for data in bar:
-            ch1 = data['target'][:,0:1].cuda()
-            ch2 = data['target'][:,1:2].cuda()
-            t_float_arr = torch.Tensor(np.random.rand(ch1.shape[0], num_bins)).cuda()
-            for i in range(t_float_arr.shape[1]):
-                inp = ch1* t_float_arr[:,i].reshape(-1,1,1,1) + ch2 * (1-t_float_arr[:,i]).reshape(-1,1,1,1)
-                xt_normalizer1.normalize(inp, t_float_arr[:,i], update=True)
-                xt_normalizer2.normalize(inp, 1-t_float_arr[:,i], update=True)
+    xt_normalizer1, xt_normalizer2 = get_xt_normalizer(train_set, opt['datasets']['train'], num_bins=100)
 
     opt['model']['xt_normalizer_1'] = xt_normalizer1
     opt['model']['xt_normalizer_2'] = xt_normalizer2
@@ -184,8 +187,7 @@ if __name__ == "__main__":
     n_iter = opt['train']['n_iter']
 
     if opt['path']['resume_state']:
-        logger.info('Resuming training from epoch: {}, iter: {}.'.format(
-            current_epoch, current_step))
+        logger.info('Resuming training from epoch: {}, iter: {}.'.format(current_epoch, current_step))
 
     diffusion.set_new_noise_schedule(
         opt['model']['beta_schedule'][opt['phase']], schedule_phase=opt['phase'])
@@ -224,8 +226,8 @@ if __name__ == "__main__":
                         opt['model']['beta_schedule']['val'], schedule_phase='val')
                     for _,  val_data in enumerate(val_loader):
                         idx += 1
-                        if idx == 20:
-                            break
+                        # if idx == 20:
+                        #     break
                         diffusion.feed_data(val_data)
                         diffusion.test(continuous=False)
                         visuals = diffusion.get_current_visuals()
@@ -244,7 +246,8 @@ if __name__ == "__main__":
                         assert target.shape[0] == 1
                         assert prediction.shape[0] == 1
                         # input_img = ((input * std_input + mean_input)/2).astype(np.uint16)
-                        target_img = (target * std_target + mean_target).astype(np.uint16)
+                        # target_img = (target * std_target + mean_target).astype(np.uint16)
+                        target_img = target.astype(np.uint16)
                         pred_img = (prediction * std_target + mean_target)
                         
                         # input_img = input_img[0]
@@ -340,7 +343,7 @@ if __name__ == "__main__":
             hr_img = Metrics.tensor2img(visuals['HR'])  # uint8
             lr_img = Metrics.tensor2img(visuals['LR'])  # uint8
             fake_img = Metrics.tensor2img(visuals['INF'])  # uint8
-
+            
             sr_img_mode = 'grid'
             if sr_img_mode == 'single':
                 # single img series

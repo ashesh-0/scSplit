@@ -52,8 +52,9 @@ def get_datasets(opt, tiled_pred=False):
         val_set = RRWDataset(datapath, val_fpath, crop_size=patch_size, fix_sample_A=nimgs, regular_aug=False)
         return train_set, val_set
     else:
-        extra_kwargs = {'normalize_channels':False}
+        extra_kwargs = {'normalize_channels':opt['datasets'].get('normalize_channels', False)}
         train_kwargs = {}
+        val_kwargs = {}
         if data_type == 'Hagen':
             train_data_location = DataLocation(channelwise_fpath=(opt['datasets']['train']['datapath']['ch0'],
                                                             opt['datasets']['train']['datapath']['ch1']))
@@ -65,7 +66,8 @@ def get_datasets(opt, tiled_pred=False):
             extra_kwargs['input_channel_idx'] = opt['datasets']['input_channel_idx'] if 'input_channel_idx' in opt['datasets'] else None
             if 'real_input_fraction' in opt['datasets']['train']:
                 train_kwargs['real_input_fraction'] = opt['datasets']['train']['real_input_fraction']
-                
+            if 'real_input_fraction' in opt['datasets']['val']:
+                val_kwargs['real_input_fraction'] = opt['datasets']['val']['real_input_fraction'] 
         
         input_from_normalized_target = opt['model']['which_model_G'] == 'joint_indi'
         train_set = SplitDataset(data_type, train_data_location, patch_size, 
@@ -97,6 +99,7 @@ def get_datasets(opt, tiled_pred=False):
                             channel_weights=channel_weights,
                             enable_transforms=False,
                             random_patching=False, input_from_normalized_target=input_from_normalized_target,
+                            **val_kwargs,
                             **extra_kwargs)
         return train_set, val_set
 

@@ -5,9 +5,9 @@ import torch.nn as nn
 from torch.nn import init
 from torch.nn import modules
 from .ddpm_modules.unet import UNet as UNetDdpm
-from .sr3_modules.unet import UNet as UNetSr3
+# from .sr3_modules.unet import UNet as UNetSr3
 from .ddpm_modules.diffusion import GaussianDiffusion as GaussianDiffusionDdpm
-from .sr3_modules.diffusion import GaussianDiffusion as GaussianDiffusionSr3
+# from .sr3_modules.diffusion import GaussianDiffusion as GaussianDiffusionSr3
 from .ddpm_modules.indi import InDI
 from .ddpm_modules.joint_indi import JointIndi
 from .ddpm_modules.time_predictor import TimePredictor

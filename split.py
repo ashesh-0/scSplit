@@ -116,8 +116,8 @@ def get_xt_normalizer(train_set,train_opt, num_bins=100, num_epochs=1):
             t_float_arr = torch.Tensor(np.random.rand(ch1.shape[0], num_bins)).cuda()
             for i in range(t_float_arr.shape[1]):
                 inp = ch1* t_float_arr[:,i].reshape(-1,1,1,1) + ch2 * (1-t_float_arr[:,i]).reshape(-1,1,1,1)
-                xt_normalizer1.normalize(inp, t_float_arr[:,i], update=True)
-                xt_normalizer2.normalize(inp, 1-t_float_arr[:,i], update=True)
+                xt_normalizer1.normalize(inp, 1 - t_float_arr[:,i], update=True)
+                xt_normalizer2.normalize(inp, t_float_arr[:,i], update=True)
     
     return xt_normalizer1, xt_normalizer2
 

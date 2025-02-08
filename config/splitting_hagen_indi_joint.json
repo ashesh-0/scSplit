@@ -15,7 +15,7 @@
     },
     "datasets": {
         "upper_clip": false,
-        "patch_size": 256,
+        "patch_size": 512,
         "max_qval": 1.0,
         // "channel_weights": [1.0, 1.0],
         "train": {
@@ -25,7 +25,7 @@
                 "ch1": "/group/jug/ashesh/data/diffsplit_hagen/train/train_mito-60x-noise2-highsnr.tif"
             },
             "datatype": "img", //lmdb or img, path of img files
-            "batch_size": 12,
+            "batch_size": 8,
             "num_workers": 4,
             "use_shuffle": true,
             "uncorrelated_channels": false
@@ -37,7 +37,7 @@
                 "ch0": "/group/jug/ashesh/data/diffsplit_hagen/val/val_actin-60x-noise2-highsnr.tif",
                 "ch1": "/group/jug/ashesh/data/diffsplit_hagen/val/val_mito-60x-noise2-highsnr.tif"
             },
-            "patch_size": 256,
+            "patch_size": 512,
             "datatype": "img" //lmdb or img, path of img files
         }
     },

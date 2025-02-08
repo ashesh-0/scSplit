@@ -25,7 +25,7 @@ class DDPM(BaseModel):
         # define network and load pretrained models
         self.netG = self.set_device(networks.define_G(opt))
         self.schedule_phase = None
-
+        self.best_val_metric = None
         # set loss and load resume state
         self.set_loss()
         self.set_new_noise_schedule(
@@ -157,7 +157,41 @@ class DDPM(BaseModel):
             'Network G structure: {}, with parameters: {:,d}'.format(net_struc_str, n))
         logger.info(s)
 
+    def save_best_network(self, epoch, iter_step, metric_val):
+        if self.best_val_metric is None or metric_val > self.best_val_metric:
+            self.best_val_metric = metric_val
+        else:
+            return False
+
+        opt_path = os.path.join(
+            self.opt['path']['checkpoint'], 'I{}_E{}_opt.pth'.format(iter_step, epoch))
+        # gen
+        network = self.netG
+        if isinstance(self.netG, nn.DataParallel):
+            network = network.module
+        state_dict = network.state_dict()
+        for key, param in state_dict.items():
+            state_dict[key] = param.cpu()
+  
+        # opt
+        opt_state = {'epoch': epoch, 'iter': iter_step,
+                     'scheduler': None, 'optimizer': None}
+        opt_state['optimizer'] = self.optG.state_dict()
+        torch.save(opt_state, opt_path)
+
+        # delete the previous best model
+        for f in os.listdir(self.opt['path']['checkpoint']):
+            if f.startswith('best_gen'):
+                os.remove(os.path.join(self.opt['path']['checkpoint'], f))
+                break
+            
+        best_path = os.path.join(self.opt['path']['checkpoint'], 'best_gen_I{}_E{}_gen.pth.pth'.format(iter_step, epoch))
+        torch.save(state_dict, best_path)
+        logger.info('Saved best model in [{:s}] ...'.format(best_path))
+      
+
     def save_network(self, epoch, iter_step):
+        
         gen_path = os.path.join(
             self.opt['path']['checkpoint'], 'I{}_E{}_gen.pth'.format(iter_step, epoch))
         opt_path = os.path.join(
@@ -170,6 +204,7 @@ class DDPM(BaseModel):
         for key, param in state_dict.items():
             state_dict[key] = param.cpu()
         torch.save(state_dict, gen_path)
+  
         # opt
         opt_state = {'epoch': epoch, 'iter': iter_step,
                      'scheduler': None, 'optimizer': None}

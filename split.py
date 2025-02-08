@@ -230,7 +230,7 @@ if __name__ == "__main__":
                     for _,  val_data in enumerate(val_loader):
                         idx += 1
                         # if idx == 20:
-                        #     break
+                            # break
                         diffusion.feed_data(val_data)
                         diffusion.test(continuous=False)
                         visuals = diffusion.get_current_visuals()
@@ -318,6 +318,8 @@ if __name__ == "__main__":
                         })
                         val_step += 1
 
+                    diffusion.save_best_network(current_epoch, current_step,avg_psnr)
+                
                 if current_step % opt['train']['save_checkpoint_freq'] == 0:
                     logger.info('Saving models and training states.')
                     diffusion.save_network(current_epoch, current_step)

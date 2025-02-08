@@ -55,8 +55,8 @@ class DDPM(BaseModel):
             self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optG,
                                                          'max',
                                                          patience=opt['train']['lr_scheduler']['patience'],
-                                                         factor=0.5,
-                                                         min_lr=1e-12,
+                                                         factor=0.2,
+                                                         min_lr=1e-5,
                                                          verbose=True)
             print('Scheduler set to ReduceLROnPlateau with patience: ', opt['train']['lr_scheduler']['patience'])
             self.log_dict = OrderedDict()

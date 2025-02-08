@@ -15,7 +15,7 @@
     },
     "datasets": {
         "upper_clip": false,
-        "patch_size": 256,
+        "patch_size": 512,
         "max_qval": 1.0,
         "input_channel_idx": 2,
         // "channel_weights": [1.0, 1.0],
@@ -24,7 +24,7 @@
             "datapath": "/group/jug/ashesh/data/diffsplit_HT_LIF/500ms/Ch_B-Ch_D-Ch_BD/train/",
             "datatype": "img", //lmdb or img, path of img files
             "real_input_fraction": 0.0,
-            "batch_size": 12,
+            "batch_size": 8,
             "num_workers": 4,
             "use_shuffle": true,
             "uncorrelated_channels": false
@@ -33,7 +33,7 @@
             "name": "HT_LIF24",
             // "target_channel_idx": 0, // If set then we do image translation from input to this channel 
             "datapath": "/group/jug/ashesh/data/diffsplit_HT_LIF/500ms/Ch_B-Ch_D-Ch_BD/val/",
-            "patch_size": 256,
+            "patch_size": 512,
             "datatype": "img" //lmdb or img, path of img files
         }
     },

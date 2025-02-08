@@ -104,8 +104,8 @@ def get_datasets(opt, tiled_pred=False):
         return train_set, val_set
 
 def get_xt_normalizer(train_set,train_opt, num_bins=100, num_epochs=1):
-    xt_normalizer1 = NormalizerXT(num_bins=num_bins+1)
-    xt_normalizer2 = NormalizerXT(num_bins=num_bins+1)
+    xt_normalizer1 = NormalizerXT(num_bins=num_bins)
+    xt_normalizer2 = NormalizerXT(num_bins=num_bins)
     from tqdm import tqdm
     for _ in range(num_epochs):
         train_loader = Data.create_dataloader(train_set, train_opt, 'train')

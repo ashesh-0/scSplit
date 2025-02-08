@@ -301,7 +301,7 @@ class SplitDataset:
         frame_idx = self.frame_idx(index)
         index = index % self.patch_count_per_frame()
         h,w = self._data_dict[0][frame_idx].shape[-2:]
-        h_idx = index // (h//self._patch_size)
+        h_idx = index // (w//self._patch_size)
         w_idx = index % (w//self._patch_size)
         return frame_idx, h_idx*self._patch_size, w_idx*self._patch_size
 

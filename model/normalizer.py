@@ -27,7 +27,11 @@ class NormalizerXT(nn.Module):
         # assert self.data_mean_fixed is None, "update() should not be called when data_mean is fixed."
 
         for batch_idx in range(x_t.shape[0]):
-            t_bin = int(t[batch_idx].item()*self.num_bins)
+            t_bin = int(np.floor(t[batch_idx].item()*self.num_bins))
+            if t_bin == self.num_bins:
+                print("Warning: t_bin is at the last bin. for t:", t[batch_idx].item())
+                t_bin = self.num_bins - 1
+            
             self.data_mean[t_bin] = (self.data_mean[t_bin]*self.count[t_bin] + x_t[batch_idx].mean())/(1 + self.count[t_bin])
             self.data_std[t_bin] = (self.data_std[t_bin]*self.count[t_bin] + x_t[batch_idx].std())/(1 + self.count[t_bin])
             self.count[t_bin] += 1

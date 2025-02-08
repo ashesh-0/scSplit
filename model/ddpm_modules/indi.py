@@ -94,7 +94,7 @@ class InDI(GaussianDiffusion):
         delta = t_float_start / num_timesteps
         cur_t = t_float_start
         ret_img = x_t
-        for idx in tqdm(range(num_timesteps), desc='inference time step'):
+        for idx in range(num_timesteps):
             x_t = self.inference_one_step(x_t, delta, cur_t)
             cur_t -= delta
             if idx % sample_inter == 0 or idx == num_timesteps-1:

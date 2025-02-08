@@ -83,6 +83,9 @@ class DDPM(BaseModel):
             self.log_dict[k] = v
 
     def test(self, continuous=False, clip_denoised=True):
+        """
+        It always tests on the synthetic input, never on the real input.
+        """
         self.netG.eval()
         with torch.no_grad():
             if isinstance(self.netG, nn.DataParallel):
@@ -95,6 +98,7 @@ class DDPM(BaseModel):
                 ch1 = self.data['target'][:,:1]
                 ch2 = self.data['target'][:,1:]
                 # the hope is that with time, once the statistics are learned, both inp1 and inp2 will be the same.
+                # normalization happens here. 
                 inp1, inp2 = self.netG.get_xt_clean(ch1, ch2, torch.Tensor([0.5]*len(ch1)).to(ch1.device), update=True)
                 self.prediction = self.netG.inference(inp1,continuous=continuous)
 

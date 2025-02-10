@@ -94,7 +94,7 @@ def get_datasets(opt, tiled_pred=False):
             class_obj = get_tiling_dataset(SplitDataset, tile_manager)
 
         val_set = class_obj(data_type, val_data_location, patch_size, target_channel_idx=target_channel_idx,
-                            normalization_dict=train_set.normalization_dict,
+                            normalization_dict=None,#train_set.normalization_dict,
                             max_qval=max_qval,
                             upper_clip=upper_clip,
                             channel_weights=channel_weights,
@@ -107,9 +107,9 @@ def get_datasets(opt, tiled_pred=False):
 def get_xt_normalizer(train_set,train_opt, num_bins=100, num_epochs=10):
     xt_normalizer1 = NormalizerXT(num_bins=num_bins)
     # xt_normalizer2 = NormalizerXT(num_bins=num_bins)
-    t_float_arr = np.arange(0,1,1/num_bins)
-    data1 = np.concatenate(train_set._data_dict[0])[::10]
-    data2 = np.concatenate(train_set._data_dict[1])[::10]
+    t_float_arr = np.arange(0,1,1/num_bins) + 1e-4
+    data1 = np.concatenate(train_set._data_dict[0])
+    data2 = np.concatenate(train_set._data_dict[1])
     for t in tqdm(t_float_arr, desc='Computing Normalization Parameters'):
         mix = data1 * (1-t) + data2 * t
         xt_normalizer1.update(mix, t)
@@ -133,7 +133,7 @@ def get_xt_normalizer(train_set,train_opt, num_bins=100, num_epochs=10):
     #             xt_normalizer1.normalize(inp, 1 - t_float_arr[:,i], update=True)
     #             xt_normalizer2.normalize(inp, t_float_arr[:,i], update=True)
     
-    return xt_normalizer1, xt_normalizer2
+    # return xt_normalizer1, xt_normalizer2
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -187,7 +187,6 @@ if __name__ == "__main__":
     # 
     # train the normalizer.  
     xt_normalizer1, xt_normalizer2 = get_xt_normalizer(train_set, opt['datasets']['train'], num_bins=100)
-
     opt['model']['xt_normalizer_1'] = xt_normalizer1
     opt['model']['xt_normalizer_2'] = xt_normalizer2
     # model
@@ -243,8 +242,8 @@ if __name__ == "__main__":
                         opt['model']['beta_schedule']['val'], schedule_phase='val')
                     for _,  val_data in enumerate(val_loader):
                         idx += 1
-                        # if idx == 20:
-                            # break
+                        if idx == 20:
+                            break
                         diffusion.feed_data(val_data)
                         diffusion.test(continuous=False)
                         visuals = diffusion.get_current_visuals()
@@ -255,10 +254,12 @@ if __name__ == "__main__":
                         # input_img = Metrics.tensor2img(input, min_max=[input.min(), input.max()])  # uint8
                         target_arr = []
                         pred_arr = []
-                        mean_target = val_set.get_input_target_normalization_dict()['mean_target']
-                        std_target = val_set.get_input_target_normalization_dict()['std_target']
-                        mean_input = val_set.get_input_target_normalization_dict()['mean_input']
-                        std_input = val_set.get_input_target_normalization_dict()['std_input']
+                        mean_target = xt_normalizer1.data_mean[[0, -1]].detach().cpu().numpy().reshape(1,-1,1,1)
+                        std_target = xt_normalizer1.data_std[[0, -1]].detach().cpu().numpy().reshape(1,-1,1,1)
+                        # mean_target = val_set.get_input_target_normalization_dict()['mean_target']
+                        # std_target = val_set.get_input_target_normalization_dict()['std_target']
+                        # mean_input = val_set.get_input_target_normalization_dict()['mean_input']
+                        # std_input = val_set.get_input_target_normalization_dict()['std_input']
                         assert input.shape[0] == 1
                         assert target.shape[0] == 1
                         assert prediction.shape[0] == 1

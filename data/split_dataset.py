@@ -209,22 +209,22 @@ class SplitDataset:
                 ],
                 additional_targets={f'image{k}': 'image' for k in range(2,2+self._numC-1)})
 
-        if normalization_dict is None:
-            print("Computing mean and std for normalization")
-            normalization_dict = compute_mean_stdev_based_normalization(self._data_dict,  self._patch_size, self._numC)
-            # normalization_dict = compute_normalization_dict(self._data_dict, self._channel_weights, self._numC, q_val=self._max_qval, uint8_data=data_type=='cifar10')
+        # if normalization_dict is None:
+        #     print("Computing mean and std for normalization")
+        #     normalization_dict = compute_mean_stdev_based_normalization(self._data_dict,  self._patch_size, self._numC)
+        #     # normalization_dict = compute_normalization_dict(self._data_dict, self._channel_weights, self._numC, q_val=self._max_qval, uint8_data=data_type=='cifar10')
         
-        self.normalization_dict = normalization_dict
+        # self.normalization_dict = normalization_dict
 
-        if upper_clip:
-            print("Clipping data to {} quantile".format(self._max_qval))
-            for ch_idx in self._data_dict.keys():
-                self._data_dict[ch_idx] = [np.clip(x, 0, normalization_dict[f'ch{ch_idx}_max']) for x in self._data_dict[ch_idx]]
+        # if upper_clip:
+        #     print("Clipping data to {} quantile".format(self._max_qval))
+        #     for ch_idx in self._data_dict.keys():
+        #         self._data_dict[ch_idx] = [np.clip(x, 0, normalization_dict[f'ch{ch_idx}_max']) for x in self._data_dict[ch_idx]]
 
-        assert 'mean_input' in normalization_dict, "mean_input must be provided"
-        assert 'std_input' in normalization_dict, "std_input must be provided"
-        assert 'mean_channel' in normalization_dict, "mean_channel must be provided"
-        assert 'std_channel' in normalization_dict, "std_channel must be provided"
+        # assert 'mean_input' in normalization_dict, "mean_input must be provided"
+        # assert 'std_input' in normalization_dict, "std_input must be provided"
+        # assert 'mean_channel' in normalization_dict, "mean_channel must be provided"
+        # assert 'std_channel' in normalization_dict, "std_channel must be provided"
 
         msg = f'[{self.__class__.__name__}] Data: {self._frameN}x{len(self._data_dict.keys())}x{self._data_dict[0][0].shape}'
         msg += f' Patch:{patch_size} Random:{int(random_patching)} Aug:{self._transform is not None} Q:{self._max_qval}'
@@ -243,36 +243,36 @@ class SplitDataset:
 
         print(msg)
 
-    def get_input_target_normalization_dict(self):
-        mean_input = self.normalization_dict['mean_input'].copy()
-        std_input = self.normalization_dict['std_input'].copy()
-        mean_channel = self.normalization_dict['mean_channel'].copy()
-        std_channel = self.normalization_dict['std_channel'].copy()
-        # input_max = self.normalization_dict['input_max'].copy()
+    # def get_input_target_normalization_dict(self):
+    #     mean_input = self.normalization_dict['mean_input'].copy()
+    #     std_input = self.normalization_dict['std_input'].copy()
+    #     mean_channel = self.normalization_dict['mean_channel'].copy()
+    #     std_channel = self.normalization_dict['std_channel'].copy()
+    #     # input_max = self.normalization_dict['input_max'].copy()
 
-        if self._input_channel_idx is not None:
-            mean_input = mean_channel[self._input_channel_idx]
-            std_input = std_channel[self._input_channel_idx]
-            target_mask = np.ones(self._numC)
-            target_mask[self._input_channel_idx] = 0
-            mean_channel = mean_channel[target_mask.astype(bool)]
-            std_channel = std_channel[target_mask.astype(bool)]
-            # input_max = self.normalization_dict[f'ch{self._input_channel_idx}_max']
+    #     if self._input_channel_idx is not None:
+    #         mean_input = mean_channel[self._input_channel_idx]
+    #         std_input = std_channel[self._input_channel_idx]
+    #         target_mask = np.ones(self._numC)
+    #         target_mask[self._input_channel_idx] = 0
+    #         mean_channel = mean_channel[target_mask.astype(bool)]
+    #         std_channel = std_channel[target_mask.astype(bool)]
+    #         # input_max = self.normalization_dict[f'ch{self._input_channel_idx}_max']
 
-        output_dict ={
-            'mean_input': mean_input.reshape(1,-1,1,1),
-            'std_input': std_input.reshape(1,-1,1,1),
-            'mean_target': mean_channel.reshape(1,-1,1,1),
-            'std_target': std_channel.reshape(1,-1,1,1),
-            # 'input_max': input_max,
-        }
+    #     output_dict ={
+    #         'mean_input': mean_input.reshape(1,-1,1,1),
+    #         'std_input': std_input.reshape(1,-1,1,1),
+    #         'mean_target': mean_channel.reshape(1,-1,1,1),
+    #         'std_target': std_channel.reshape(1,-1,1,1),
+    #         # 'input_max': input_max,
+    #     }
         # target_idx = 0
         # for ch_idx in range(self._numC):
         #     if ch_idx == self._input_channel_idx:
         #         continue
         #     output_dict[f'target{target_idx}_max'] = self.normalization_dict[f'ch{ch_idx}_max']
         #     target_idx += 1
-        return output_dict
+        # return output_dict
 
     def normalize_inp(self, inp):
         norm_inp = (inp - self.normalization_dict['mean_input'].reshape(-1,1,1))/self.normalization_dict['std_input'].reshape(-1,1,1)

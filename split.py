@@ -14,6 +14,7 @@ from core.psnr import PSNR
 from collections import defaultdict
 from predtiler.dataset import get_tiling_dataset, get_tile_manager
 from model.normalizer import NormalizerXT
+from tqdm import tqdm
 
 # from tensorboardX import SummaryWriter
 import os
@@ -103,21 +104,34 @@ def get_datasets(opt, tiled_pred=False):
                             **extra_kwargs)
         return train_set, val_set
 
-def get_xt_normalizer(train_set,train_opt, num_bins=100, num_epochs=1):
+def get_xt_normalizer(train_set,train_opt, num_bins=100, num_epochs=10):
     xt_normalizer1 = NormalizerXT(num_bins=num_bins)
-    xt_normalizer2 = NormalizerXT(num_bins=num_bins)
-    from tqdm import tqdm
-    for _ in range(num_epochs):
-        train_loader = Data.create_dataloader(train_set, train_opt, 'train')
-        bar = tqdm(train_loader)
-        for data in bar:
-            ch1 = data['target'][:,0:1].cuda()
-            ch2 = data['target'][:,1:2].cuda()
-            t_float_arr = torch.Tensor(np.random.rand(ch1.shape[0], num_bins)).cuda()
-            for i in range(t_float_arr.shape[1]):
-                inp = ch1* t_float_arr[:,i].reshape(-1,1,1,1) + ch2 * (1-t_float_arr[:,i]).reshape(-1,1,1,1)
-                xt_normalizer1.normalize(inp, 1 - t_float_arr[:,i], update=True)
-                xt_normalizer2.normalize(inp, t_float_arr[:,i], update=True)
+    # xt_normalizer2 = NormalizerXT(num_bins=num_bins)
+    t_float_arr = np.arange(0,1,1/num_bins)
+    data1 = np.concatenate(train_set._data_dict[0])[::10]
+    data2 = np.concatenate(train_set._data_dict[1])[::10]
+    for t in tqdm(t_float_arr, desc='Computing Normalization Parameters'):
+        mix = data1 * (1-t) + data2 * t
+        xt_normalizer1.update(mix, t)
+        # break
+
+    
+    xt_normalizer2 = NormalizerXT(num_bins=num_bins, data_mean = xt_normalizer1.data_mean.flip(0),
+                                    data_std = xt_normalizer1.data_std.flip(0), data_count=xt_normalizer1.count.flip(0))
+    return xt_normalizer1, xt_normalizer2
+
+    # from tqdm import tqdm
+    # for _ in range(num_epochs):
+    #     train_loader = Data.create_dataloader(train_set, train_opt, 'train')
+    #     bar = tqdm(train_loader)
+    #     for data in bar:
+    #         ch1 = data['target'][:,0:1].cuda()
+    #         ch2 = data['target'][:,1:2].cuda()
+    #         t_float_arr = torch.Tensor(np.random.rand(ch1.shape[0], num_bins)).cuda()
+    #         for i in range(t_float_arr.shape[1]):
+    #             inp = ch1* t_float_arr[:,i].reshape(-1,1,1,1) + ch2 * (1-t_float_arr[:,i]).reshape(-1,1,1,1)
+    #             xt_normalizer1.normalize(inp, 1 - t_float_arr[:,i], update=True)
+    #             xt_normalizer2.normalize(inp, t_float_arr[:,i], update=True)
     
     return xt_normalizer1, xt_normalizer2
 
@@ -172,7 +186,7 @@ if __name__ == "__main__":
     
     # 
     # train the normalizer.  
-    xt_normalizer1, xt_normalizer2 = get_xt_normalizer(train_set, opt['datasets']['train'], num_bins=100, num_epochs=10)
+    xt_normalizer1, xt_normalizer2 = get_xt_normalizer(train_set, opt['datasets']['train'], num_bins=10)
 
     opt['model']['xt_normalizer_1'] = xt_normalizer1
     opt['model']['xt_normalizer_2'] = xt_normalizer2

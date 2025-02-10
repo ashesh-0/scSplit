@@ -128,7 +128,7 @@ class InDI(GaussianDiffusion):
         return self._xt_normalizer.normalize(x_t, t, update=update)
     
 
-    def get_xt_clean(self, x_start, x_end, t:float, update=True):
+    def get_xt_clean(self, x_start, x_end, t:float, update=False):
         """
         Returns an estimate of the superimposed input at time t.
         Essentially, this is the interpolation between x_start and x_end at time t.

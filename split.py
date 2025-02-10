@@ -186,7 +186,7 @@ if __name__ == "__main__":
     
     # 
     # train the normalizer.  
-    xt_normalizer1, xt_normalizer2 = get_xt_normalizer(train_set, opt['datasets']['train'], num_bins=10)
+    xt_normalizer1, xt_normalizer2 = get_xt_normalizer(train_set, opt['datasets']['train'], num_bins=100)
 
     opt['model']['xt_normalizer_1'] = xt_normalizer1
     opt['model']['xt_normalizer_2'] = xt_normalizer2

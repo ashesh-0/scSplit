@@ -85,7 +85,7 @@ def get_datasets(opt, tiled_pred=False):
         else:
             if data_type == 'Hagen':
                 data_shape = (10, 2048, 2048)
-            elif data_type == 'HT_LIF':
+            elif data_type in ['HT_LIF', 'HT_LIF24']:
                 data_shape = (12, 1608, 1608)
             elif data_type == 'COSEM_jrc-hela':
                 data_shape = (96, 700, 700)

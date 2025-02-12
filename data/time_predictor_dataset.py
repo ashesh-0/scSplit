@@ -30,11 +30,26 @@ class TimePredictorDataset(SplitDataset):
         super(TimePredictorDataset, self).__init__(*args, **kwargs)
         self._num_timesteps = 100
         self._fixed_t = None
-        # self.input_normalization_dict = compute_input_normalization_dict(self._data_dict, self._num_timesteps, self._mean_target, self._std_target)
+        # self.input_normalization_dict = None
+        # if self._normalize_channels:
+        #     self.input_normalization_dict = compute_input_normalization_dict(self._data_dict, self._num_timesteps, self._mean_target, self._std_target)
+        
         # self.normalizer = Normalizer(self._data_dict, self._max_qval, step_size= step_size)
         if self._gaussian_noise_std_factor is not None:
             print("Adding Gaussian noise with std factor: ", self._gaussian_noise_std_factor)
 
+    def _load_data(self, data_type):
+        data = super()._load_data(data_type)
+        keys_to_remove = []
+        for key in data.keys():
+            if key not in [0,1]:
+                print('Warning: Removing key:', key)
+                keys_to_remove.append(key)
+        
+        for key in keys_to_remove:
+            data.pop(key)
+        return data
+    
     def reset_fixed_t(self):
         self._fixed_t = None
     
@@ -81,7 +96,9 @@ class TimePredictorDataset(SplitDataset):
 
         # normalize the target 
         target = np.stack([patch1, patch2], axis=0)
-        # target = self.normalize_target(target)
+        if self._normalize_channels:
+            target = self.normalize_channels(target)
+        
         patch1, patch2 = target[0], target[1]
         
         t, _ = self.sample_t()

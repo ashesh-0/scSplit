@@ -24,9 +24,10 @@ def get_datasets(opt, tiled_pred=False):
     upper_clip = opt['datasets'].get('upper_clip', None)
     max_qval = opt['datasets']['max_qval']
     channel_weights = opt['datasets'].get('channel_weights', None)
-
+    normalize_channels = opt['datasets'].get('normalize_channels', False)
     data_type = opt['datasets']['train']['name']  
     uncorrelated_channels = opt['datasets']['train']['uncorrelated_channels']
+    
     assert data_type in ['cifar10', 'Hagen','COSEM_jrc-hela', 'HT_LIF24'], f'Invalid data type: {data_type}'
     if data_type == 'Hagen':
         train_data_location = DataLocation(channelwise_fpath=(opt['datasets']['train']['datapath']['ch0'],
@@ -47,7 +48,8 @@ def get_datasets(opt, tiled_pred=False):
                                 uncorrelated_channels=uncorrelated_channels,
                                 channel_weights=channel_weights,
                              normalization_dict=None, enable_transforms=True,random_patching=True,
-                             gaussian_noise_std_factor=gaussian_noise_std_factor,)
+                             gaussian_noise_std_factor=gaussian_noise_std_factor,
+                             normalize_channels=normalize_channels)
 
     if not tiled_pred:
         class_obj = TimePredictorDataset 
@@ -60,7 +62,8 @@ def get_datasets(opt, tiled_pred=False):
                             upper_clip=upper_clip,
                             channel_weights=channel_weights,
                            enable_transforms=False,
-                                                     random_patching=False)
+                            random_patching=False,
+                            normalize_channels=normalize_channels)
     return train_set, val_set
 
 def start_training(opt):
@@ -97,8 +100,13 @@ def start_training(opt):
         )
     model = model.cuda()
 
+    dummy_normalizer_flag = opt['datasets'].get('normalize_channels', False) is True
     # instantiate the normalizer
-    xt_normalizer = NormalizerXT()
+    if dummy_normalizer_flag:
+        print('--------Dummy Normalizer Activated--------')
+        xt_normalizer = None
+    else:
+        xt_normalizer = NormalizerXT()
 
     train_loader = DataLoader(train_set, batch_size=opt['datasets']['train']['batch_size'], shuffle=True, num_workers=opt['datasets']['train']['num_workers'])
     val_loader = DataLoader(val_set, batch_size=opt['datasets']['train']['batch_size'], shuffle=False, num_workers=opt['datasets']['train']['num_workers'])
@@ -129,7 +137,9 @@ def start_training(opt):
             optimizer.zero_grad()
             x = x.cuda()
             t_float = t_float.cuda()
-            x = xt_normalizer.normalize(x,t_float, update=True)
+            if xt_normalizer is not None:
+                x = xt_normalizer.normalize(x,t_float, update=True)
+            
             t_float_pred = model(x)
             loss = loss_fn(t_float_pred, t_float.type(torch.float32))
             loss.backward()
@@ -147,7 +157,8 @@ def start_training(opt):
         for i, (x, t_float) in enumerate(val_loader):
             x = x.cuda()
             t_float = t_float.cuda()
-            x = xt_normalizer.normalize(x,t_float, update=True)
+            if xt_normalizer is not None:
+                x = xt_normalizer.normalize(x,t_float, update=True)
             t_float_pred = model(x)
             loss = loss_fn(t_float_pred, t_float.type(torch.float32))
             val_losses.append(loss.item())

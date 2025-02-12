@@ -181,7 +181,7 @@ class SplitDataset:
         if self._channel_weights is None:
             self._channel_weights = [1,1]
         # channel_idx is the key. value is list of full sized frames.
-        self._data_dict = load_data(data_type, self._data_location)
+        self._data_dict = self._load_data(data_type)
         self._numC = len(self._data_dict.keys())
         for i in range(self._numC):
             assert i in self._data_dict, f"Channel {i} has no data"
@@ -242,6 +242,9 @@ class SplitDataset:
         
 
         print(msg)
+
+    def _load_data(self, data_type):
+        return load_data(data_type, self._data_location)
 
     def get_input_target_normalization_dict(self):
         mean_input = self.normalization_dict['mean_input'].copy()

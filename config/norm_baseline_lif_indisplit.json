@@ -15,17 +15,17 @@
     },
     "datasets": {
         "upper_clip": false,
-        "patch_size": 256,
+        "patch_size": 512,
         "max_qval": 1.0,
         "input_channel_idx": 2,
-        "normalize_channels": false,
+        "normalize_channels": true,
         // "channel_weights": [1.0, 1.0],
         "train": {
             "name": "HT_LIF24",
             "datapath": "/group/jug/ashesh/data/diffsplit_HT_LIF/500ms/Ch_B-Ch_D-Ch_BD/train/",
             "datatype": "img", //lmdb or img, path of img files
             "real_input_fraction": 0.0,
-            "batch_size": 12,
+            "batch_size": 8,
             "num_workers": 4,
             "use_shuffle": true,
             "uncorrelated_channels": false
@@ -34,7 +34,7 @@
             "name": "HT_LIF24",
             // "target_channel_idx": 0, // If set then we do image translation from input to this channel 
             "datapath": "/group/jug/ashesh/data/diffsplit_HT_LIF/500ms/Ch_B-Ch_D-Ch_BD/val/",
-            "patch_size": 256,
+            "patch_size": 512,
             "datatype": "img" //lmdb or img, path of img files
         }
     },
@@ -77,7 +77,7 @@
             },
             "val": {
                 "schedule": "linear",
-                "n_timestep": 3,
+                "n_timestep": 1,
                 "linear_start": 1e-6,
                 "linear_end": 1e-2
             }
@@ -90,16 +90,16 @@
     },
     "train": {
         "n_iter": 1000000,
-        "val_freq": 50,
-        "save_checkpoint_freq": 50,
-        "print_freq": 50,
+        "val_freq": 1e4,
+        "save_checkpoint_freq": 1e4,
+        "print_freq": 500,
         "optimizer": {
             "type": "adam",
             "lr": 1e-3
             
         },
         "lr_scheduler": {
-            "patience": 10
+            "patience": 100
             // "step_start_ema": 5000,
             // "update_ema_every": 1,
             // "ema_decay": 0.9999

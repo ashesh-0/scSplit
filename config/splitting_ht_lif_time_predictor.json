@@ -15,14 +15,14 @@
     },
     "datasets": {
         "upper_clip": false,
-        "patch_size": 256,
+        "patch_size": 512,
         "max_qval": 1.0,
         "channel_weights": [1.0, 1.0],
         "train": {
             "name": "HT_LIF24",
             "datapath": "/group/jug/ashesh/data/diffsplit_HT_LIF/500ms/Ch_B-Ch_D-Ch_BD/train/",
             "datatype": "img", //lmdb or img, path of img files
-            "batch_size": 16,
+            "batch_size": 8,
             "num_workers": 4,
             "use_shuffle": true,
             "uncorrelated_channels": false,
@@ -31,7 +31,7 @@
         "val": {
             "name": "HT_LIF24",
             "datapath": "/group/jug/ashesh/data/diffsplit_HT_LIF/500ms/Ch_B-Ch_D-Ch_BD/val/",
-            "patch_size": 256,
+            "patch_size": 512,
             "datatype": "img" //lmdb or img, path of img files
         }
     },

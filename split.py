@@ -88,7 +88,7 @@ def get_datasets(opt, tiled_pred=False):
             elif data_type in ['HT_LIF', 'HT_LIF24']:
                 data_shape = (12, 1608, 1608)
             elif data_type == 'COSEM_jrc-hela':
-                data_shape = (96, 700, 700)
+                data_shape = (96, 900, 1400)
             tile_manager = get_tile_manager(data_shape, (1, patch_size//2, patch_size//2), (1, patch_size, patch_size))
             class_obj = get_tiling_dataset(SplitDataset, tile_manager)
 

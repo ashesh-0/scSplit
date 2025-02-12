@@ -103,9 +103,13 @@ def get_datasets(opt, tiled_pred=False):
                             **extra_kwargs)
         return train_set, val_set
 
-def get_xt_normalizer(train_set,train_opt, num_bins=100, num_epochs=1):
+def get_xt_normalizer(train_set,train_opt, num_bins=100, num_epochs=1, dummy=False):
     xt_normalizer1 = NormalizerXT(num_bins=num_bins)
     xt_normalizer2 = NormalizerXT(num_bins=num_bins)
+    if dummy:
+        print('--------Dummy Normalizer Activated--------')
+        return None, None #xt_normalizer1, xt_normalizer2
+    
     from tqdm import tqdm
     for _ in range(num_epochs):
         train_loader = Data.create_dataloader(train_set, train_opt, 'train')
@@ -171,8 +175,9 @@ if __name__ == "__main__":
     logger.info('Initial Dataset Finished')
     
     # 
-    # train the normalizer.  
-    xt_normalizer1, xt_normalizer2 = get_xt_normalizer(train_set, opt['datasets']['train'], num_bins=100, num_epochs=10)
+    dummy_normalizer_flag = opt['datasets'].get('normalize_channels', False) is True
+    # train the normalizers if we are not normalizing the channels.  
+    xt_normalizer1, xt_normalizer2 = get_xt_normalizer(train_set, opt['datasets']['train'], dummy=dummy_normalizer_flag,num_bins=100, num_epochs=10)
 
     opt['model']['xt_normalizer_1'] = xt_normalizer1
     opt['model']['xt_normalizer_2'] = xt_normalizer2
@@ -249,8 +254,11 @@ if __name__ == "__main__":
                         assert target.shape[0] == 1
                         assert prediction.shape[0] == 1
                         # input_img = ((input * std_input + mean_input)/2).astype(np.uint16)
-                        # target_img = (target * std_target + mean_target).astype(np.uint16)
-                        target_img = target.astype(np.uint16)
+                        if dummy_normalizer_flag:
+                            # when the normalizer is dummy, the target image is normalized and therefore needs to be unnormalized.
+                            target_img = (target * std_target + mean_target).astype(np.uint16)
+                        else:
+                            target_img = target.astype(np.uint16)
                         pred_img = (prediction * std_target + mean_target)
                         
                         # input_img = input_img[0]

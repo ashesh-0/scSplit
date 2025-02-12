@@ -125,6 +125,9 @@ class InDI(GaussianDiffusion):
         raise NotImplementedError("This is not needed.")
     
     def normalize_xt(self, x_t, t, update=True):
+        if self._xt_normalizer is None:
+            return x_t
+        
         return self._xt_normalizer.normalize(x_t, t, update=update)
     
 

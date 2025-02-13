@@ -265,8 +265,8 @@ class SplitDataset:
         output_dict ={
             'mean_input': mean_input.reshape(1,-1,1,1),
             'std_input': std_input.reshape(1,-1,1,1),
-            'mean_target': mean_channel.reshape(1,-1,1,1),
-            'std_target': std_channel.reshape(1,-1,1,1),
+            'mean_channel': mean_channel.reshape(1,-1,1,1),
+            'std_channel': std_channel.reshape(1,-1,1,1),
             # 'input_max': input_max,
         }
         # target_idx = 0

@@ -20,8 +20,12 @@
         "channel_weights": [1.0, 1.0],
         "normalize_channels": true,
         "train": {
-            "name": "HT_LIF24",
-            "datapath": "/group/jug/ashesh/data/diffsplit_HT_LIF/500ms/Ch_B-Ch_D-Ch_BD/train/",
+            "name": "Hagen",
+            // "target_channel_idx": 0, // If set then we do image translation from input to this channel 
+            "datapath": {
+                "ch0": "/group/jug/ashesh/data/diffsplit_hagen/train/train_actin-60x-noise2-highsnr.tif",
+                "ch1": "/group/jug/ashesh/data/diffsplit_hagen/train/train_mito-60x-noise2-highsnr.tif"
+            },
             "datatype": "img", //lmdb or img, path of img files
             "batch_size": 8,
             "num_workers": 4,
@@ -30,8 +34,12 @@
             "gaussian_noise_std_factor": 0.05
         },
         "val": {
-            "name": "HT_LIF24",
-            "datapath": "/group/jug/ashesh/data/diffsplit_HT_LIF/500ms/Ch_B-Ch_D-Ch_BD/val/",
+            "name": "Hagen",
+            // "target_channel_idx": 0, // If set then we do image translation from input to this channel 
+            "datapath": {
+                "ch0": "/group/jug/ashesh/data/diffsplit_hagen/val/val_actin-60x-noise2-highsnr.tif",
+                "ch1": "/group/jug/ashesh/data/diffsplit_hagen/val/val_mito-60x-noise2-highsnr.tif"
+            },
             "patch_size": 512,
             "datatype": "img" //lmdb or img, path of img files
         }

@@ -57,7 +57,7 @@ def get_datasets(opt, tiled_pred=False):
         raise NotImplementedError('Tiled prediction not implemented yet')
 
     val_set = class_obj(data_type, val_data_location, patch_size, target_channel_idx=target_channel_idx,
-                        #    normalization_dict=train_set.get_normalization_dict(),
+                           normalization_dict=train_set.get_input_target_normalization_dict(),
                            max_qval=max_qval,
                             upper_clip=upper_clip,
                             channel_weights=channel_weights,
@@ -104,9 +104,11 @@ def start_training(opt):
     # instantiate the normalizer
     if dummy_normalizer_flag:
         print('--------Dummy Normalizer Activated--------')
-        xt_normalizer = None
+        xt_normalizer_train = None
+        xt_normalizer_val = None
     else:
-        xt_normalizer = NormalizerXT()
+        xt_normalizer_train = NormalizerXT()
+        xt_normalizer_val = NormalizerXT()
 
     train_loader = DataLoader(train_set, batch_size=opt['datasets']['train']['batch_size'], shuffle=True, num_workers=opt['datasets']['train']['num_workers'])
     val_loader = DataLoader(val_set, batch_size=opt['datasets']['train']['batch_size'], shuffle=False, num_workers=opt['datasets']['train']['num_workers'])
@@ -124,6 +126,8 @@ def start_training(opt):
         loss_fn = torch.nn.L1Loss()
     elif opt['model']['loss_type'] == 'l2':
         loss_fn = torch.nn.MSELoss()
+    else:
+        raise ValueError(f"Invalid loss type {opt['model']['loss_type']}")   
 
     # tqdm bar with loss 
     epoch_losses = []
@@ -137,8 +141,8 @@ def start_training(opt):
             optimizer.zero_grad()
             x = x.cuda()
             t_float = t_float.cuda()
-            if xt_normalizer is not None:
-                x = xt_normalizer.normalize(x,t_float, update=True)
+            if xt_normalizer_train is not None:
+                x = xt_normalizer_train.normalize(x,t_float, update=True)
             
             t_float_pred = model(x)
             loss = loss_fn(t_float_pred, t_float.type(torch.float32))
@@ -148,7 +152,7 @@ def start_training(opt):
             optimizer.step()
             if wandb_logger is not None:
                 wandb_logger.log_metrics({'train_loss_step':loss.item()})
-
+            
         epoch_losses.append(np.mean(loss_arr))
         scheduler.step(epoch_losses[-1])
         # validation
@@ -157,8 +161,8 @@ def start_training(opt):
         for i, (x, t_float) in enumerate(val_loader):
             x = x.cuda()
             t_float = t_float.cuda()
-            if xt_normalizer is not None:
-                x = xt_normalizer.normalize(x,t_float, update=True)
+            if xt_normalizer_val is not None:
+                x = xt_normalizer_val.normalize(x,t_float, update=True)
             t_float_pred = model(x)
             loss = loss_fn(t_float_pred, t_float.type(torch.float32))
             val_losses.append(loss.item())

@@ -240,6 +240,10 @@ class SplitDataset:
     def _load_data(self, data_type):
         return load_data(data_type, self._data_location)
 
+    def set_random_patching(self, boolean_flag):
+        self._random_patching = boolean_flag
+        print(f'Random patching set to {boolean_flag}')
+        
     def get_input_target_normalization_dict(self):
         mean_input = self.normalization_dict['mean_input'].copy()
         std_input = self.normalization_dict['std_input'].copy()

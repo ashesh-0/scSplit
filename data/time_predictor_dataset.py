@@ -1,7 +1,7 @@
 import sys; sys.path.append('..')
 import numpy as np
 from tqdm import tqdm
-from data.split_dataset import SplitDataset, compute_normalization_dict, DataLocation
+from data.split_dataset import SplitDataset, DataLocation
 
 # def compute_input_normalization_dict(data_dict, n_timesteps, mean_target, std_target):
 #     mean_ch0, mean_ch1 = mean_target.squeeze()

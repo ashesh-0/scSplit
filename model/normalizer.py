@@ -29,7 +29,7 @@ class NormalizerXT(nn.Module):
         for batch_idx in range(x_t.shape[0]):
             t_bin = int(np.floor(t[batch_idx].item()*self.num_bins))
             if t_bin == self.num_bins:
-                print("Warning: t_bin is at the last bin. for t:", t[batch_idx].item())
+                # print("Warning: t_bin is at the last bin. for t:", t[batch_idx].item())
                 t_bin = self.num_bins - 1
             
             self.data_mean[t_bin] = (self.data_mean[t_bin]*self.count[t_bin] + x_t[batch_idx].mean())/(1 + self.count[t_bin])
@@ -42,6 +42,7 @@ class NormalizerXT(nn.Module):
         
         param_shape = [len(x_t)] + [1]*(len(x_t.shape)-1)
         t_bins = (t * self.num_bins).type(torch.long)
+        t_bins[t_bins == self.num_bins] = self.num_bins - 1
         mean_val = self.data_mean[t_bins].reshape(param_shape)
         std_val = self.data_std[t_bins].reshape(param_shape)
         return (x_t - mean_val) / std_val

@@ -7,15 +7,8 @@ from typing import Tuple, Dict, List
 # import sys; sys.path.append('..')
 from data.cifar10 import load_train_val_data as load_cifar10_data
 from data.HT_LIF_rawdata import load_HT_LIF_data
-@dataclass
-class DataLocation:
-    fpath: str = ''
-    channelwise_fpath: Tuple[str]= ()
-    directory: str = ''
-
-    def __post_init__(self):
-        assert self.fpath or len(self.channelwise_fpath) or self.directory, "At least one of the following must be provided: fpath, channelwise_fpath, directory"
-        assert (self.fpath and not self.channelwise_fpath and not self.directory) or (not self.fpath and self.channelwise_fpath and not self.directory) or (not self.fpath and not self.channelwise_fpath and self.directory), "Only one of the following must be provided: fpath, channelwise_fpath, directory"
+from data.data_location import DataLocation
+from data.goprodehazing2017_data import get_train_val_test_data as load_gopro_data
 
 def load_data(data_type, dataloc:DataLocation)->Dict[int, List[np.ndarray]]:
     if data_type == 'cifar10':
@@ -33,7 +26,8 @@ def load_data(data_type, dataloc:DataLocation)->Dict[int, List[np.ndarray]]:
         for i in range(data.shape[-1]):
             data_dict[i] = [x for x in data[...,i]]
         return data_dict
-    
+    elif data_type == 'goPro2017dehazing':
+        return load_gopro_data(dataloc)
     else:
         assert data_type == "Hagen", "Only Hagen data is supported"
         if dataloc.fpath:
@@ -56,7 +50,7 @@ def compute_mean_stdev_based_normalization(data_dict, patch_size:int, numC:int, 
             h,w = img.shape[-2:]
             h_idx = np.random.randint(0, h-patch_size)
             w_idx = np.random.randint(0, w-patch_size)
-            patch = img[h_idx:h_idx+patch_size, w_idx:w_idx+patch_size]
+            patch = img[...,h_idx:h_idx+patch_size, w_idx:w_idx+patch_size]
             mean_arr.append(np.mean(patch))
             std_arr.append(np.std(patch))
         
@@ -68,60 +62,60 @@ def compute_mean_stdev_based_normalization(data_dict, patch_size:int, numC:int, 
 
     return output
 
-def compute_normalization_dict(data_dict, channel_weights:List[float], numC:int, q_val=1.0, uint8_data=False):
-    """
-    x/x_max [0,1]
-    2 x/x_max -1 [-1,1]
-    (2x - x_max)/x_max [-1,1]
-    (x - x_max/2)/(x_max/2) [-1,1]
-    """
-    if uint8_data:
-        tar_max = 255
-        inp_max = tar_max * np.sum(channel_weights)
-        img_shape = data_dict[0][0].shape
-        tar1_max = tar_max
-        tar2_max = tar_max
-        if len(img_shape) == 2:
-            nC = 1
-        else:
-            nC = img_shape[0]
-        return {
-            'mean_input': inp_max/2,
-            'std_input': inp_max/2,
-            'mean_target': np.array([tar1_max/2]*nC + [tar2_max/2]*nC),
-            'std_target': np.array([tar1_max/2]*nC + [tar2_max/2]*nC),
-            # 
-            'ch0_max': tar1_max,
-            'ch1_max': tar2_max,
-            'input_max': inp_max
-        }
+# def compute_normalization_dict(data_dict, channel_weights:List[float], numC:int, q_val=1.0, uint8_data=False):
+#     """
+#     x/x_max [0,1]
+#     2 x/x_max -1 [-1,1]
+#     (2x - x_max)/x_max [-1,1]
+#     (x - x_max/2)/(x_max/2) [-1,1]
+#     """
+#     if uint8_data:
+#         tar_max = 255
+#         inp_max = tar_max * np.sum(channel_weights)
+#         img_shape = data_dict[0][0].shape
+#         tar1_max = tar_max
+#         tar2_max = tar_max
+#         if len(img_shape) == 2:
+#             nC = 1
+#         else:
+#             nC = img_shape[0]
+#         return {
+#             'mean_input': inp_max/2,
+#             'std_input': inp_max/2,
+#             'mean_target': np.array([tar1_max/2]*nC + [tar2_max/2]*nC),
+#             'std_target': np.array([tar1_max/2]*nC + [tar2_max/2]*nC),
+#             # 
+#             'ch0_max': tar1_max,
+#             'ch1_max': tar2_max,
+#             'input_max': inp_max
+#         }
 
-    else:
-        mean_channel = []
-        std_channel = []
-        ch_unravel_list = []
-        output_dict = {}
-        for i in range(numC):
-            ch_unravel = np.concatenate([x.reshape(-1,) for x in data_dict[i]])
-            ch_max = np.quantile(ch_unravel, q_val)
-            mean_channel.append(ch_max/2)
-            std_channel.append(ch_max/2)
-            ch_unravel_list.append(ch_unravel)
-            output_dict[f'ch{i}_max'] = ch_max
+#     else:
+#         mean_channel = []
+#         std_channel = []
+#         ch_unravel_list = []
+#         output_dict = {}
+#         for i in range(numC):
+#             ch_unravel = np.concatenate([x.reshape(-1,) for x in data_dict[i]])
+#             ch_max = np.quantile(ch_unravel, q_val)
+#             mean_channel.append(ch_max/2)
+#             std_channel.append(ch_max/2)
+#             ch_unravel_list.append(ch_unravel)
+#             output_dict[f'ch{i}_max'] = ch_max
 
 
-        inp_max = np.quantile(ch_unravel_list[0]*channel_weights[0]+(
-                              ch_unravel_list[1]*channel_weights[1]), 
-                              q_val)
+#         inp_max = np.quantile(ch_unravel_list[0]*channel_weights[0]+(
+#                               ch_unravel_list[1]*channel_weights[1]), 
+#                               q_val)
         
-        output_dict.update({
-            'mean_input': inp_max/2,
-            'std_input': inp_max/2,
-            'mean_channel': np.array(mean_channel),
-            'std_channel': np.array(std_channel),
-            'input_max': inp_max
-        })
-        return output_dict
+#         output_dict.update({
+#             'mean_input': inp_max/2,
+#             'std_input': inp_max/2,
+#             'mean_channel': np.array(mean_channel),
+#             'std_channel': np.array(std_channel),
+#             'input_max': inp_max
+#         })
+#         return output_dict
 
 
 def _load_data_channelwise_fpath_hagen(fpaths:Tuple[str])-> Dict[int, List[np.ndarray]]:
@@ -357,7 +351,7 @@ class SplitDataset:
         if patch_arr[0].ndim == 2:
             patch_arr = [x[None] for x in patch_arr]
 
-
+        
         target = np.concatenate(patch_arr, axis=0)
         
         if self._normalize_channels:

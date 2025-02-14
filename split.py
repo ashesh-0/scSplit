@@ -9,6 +9,7 @@ from core.wandb_logger import WandbLogger
 from data.split_dataset import SplitDataset, DataLocation
 from data.rrw_dataset import my_dataset_wTxt as RRWDataset
 from data.split_dataset_tiledpred import SplitDatasetTiledPred
+from data.restoration_dataset import RestorationDataset
 
 from core.psnr import PSNR
 from collections import defaultdict
@@ -39,7 +40,7 @@ def get_datasets(opt, tiled_pred=False):
 
     data_type = opt['datasets']['train']['name']  
     uncorrelated_channels = opt['datasets']['train']['uncorrelated_channels']
-    allowed_dsets = ['cifar10', 'Hagen', "RRW", "HT_LIF24", "COSEM_jrc-hela"]
+    allowed_dsets = ['cifar10', 'Hagen', "RRW", "HT_LIF24", "COSEM_jrc-hela", "goPro2017dehazing"]
     assert data_type in allowed_dsets, f"Only one of {allowed_dsets} datasets are supported. Found {data_type}"
     if data_type == 'RRW':
         rootdir = opt['datasets']['datapath']
@@ -51,6 +52,41 @@ def get_datasets(opt, tiled_pred=False):
         train_set = RRWDataset(datapath, train_fpath, crop_size=patch_size, fix_sample_A=nimgs, regular_aug=True)
         val_set = RRWDataset(datapath, val_fpath, crop_size=patch_size, fix_sample_A=nimgs, regular_aug=False)
         return train_set, val_set
+    elif data_type == 'goPro2017dehazing':
+        train_data_location = DataLocation(directory=(opt['datasets']['train']['datapath']), datasplit_type='train')
+        val_data_location = DataLocation(directory=(opt['datasets']['val']['datapath']), datasplit_type='val')
+
+        train_set = RestorationDataset(data_type, train_data_location, patch_size, 
+                                target_channel_idx=target_channel_idx, 
+                                    max_qval=max_qval, upper_clip=upper_clip,
+                                    uncorrelated_channels=uncorrelated_channels,
+                                    channel_weights=channel_weights,
+                                normalization_dict=None, enable_transforms=True,random_patching=True, 
+                                # input_from_normalized_target=input_from_normalized_target,
+                                # **extra_kwargs,
+                                # **train_kwargs
+                                )
+        if not tiled_pred:
+            class_obj = RestorationDataset 
+        else:
+            raise NotImplementedError('Tiled prediction not implemented yet')
+            data_shape = (96, 900, 1400)
+            tile_manager = get_tile_manager(data_shape, (1, patch_size//2, patch_size//2), (1, patch_size, patch_size))
+            class_obj = get_tiling_dataset(SplitDataset, tile_manager)
+
+        val_set = class_obj(data_type, val_data_location, patch_size, target_channel_idx=target_channel_idx,
+                            normalization_dict=train_set.normalization_dict,
+                            max_qval=max_qval,
+                            upper_clip=upper_clip,
+                            channel_weights=channel_weights,
+                            enable_transforms=False,
+                            random_patching=False, 
+                            # input_from_normalized_target=input_from_normalized_target,
+                            # **val_kwargs,
+                            # **extra_kwargs
+                            )
+        return train_set, val_set
+
     else:
         extra_kwargs = {'normalize_channels':opt['datasets'].get('normalize_channels', False)}
         train_kwargs = {}
@@ -68,7 +104,8 @@ def get_datasets(opt, tiled_pred=False):
                 train_kwargs['real_input_fraction'] = opt['datasets']['train']['real_input_fraction']
             if 'real_input_fraction' in opt['datasets']['val']:
                 val_kwargs['real_input_fraction'] = opt['datasets']['val']['real_input_fraction'] 
-        
+        else:
+            raise ValueError('Invalid data type')
         input_from_normalized_target = opt['model']['which_model_G'] == 'joint_indi'
         train_set = SplitDataset(data_type, train_data_location, patch_size, 
                                 target_channel_idx=target_channel_idx, 
@@ -122,9 +159,32 @@ def get_xt_normalizer(train_set,train_opt, num_bins=100, num_epochs=1, dummy=Fal
                 inp = ch1* t_float_arr[:,i].reshape(-1,1,1,1) + ch2 * (1-t_float_arr[:,i]).reshape(-1,1,1,1)
                 xt_normalizer1.normalize(inp, 1 - t_float_arr[:,i], update=True)
                 xt_normalizer2.normalize(inp, t_float_arr[:,i], update=True)
-    
     return xt_normalizer1, xt_normalizer2
 
+def get_xt_normalizer_restoration(train_set,train_opt, num_bins=100, num_epochs=1, dummy=False):
+    xt_normalizer1 = NormalizerXT(num_bins=num_bins)
+    if dummy:
+        print('--------Dummy Normalizer Activated--------')
+        return None, None #xt_normalizer1, xt_normalizer2
+    
+    idx = 0
+    from tqdm import tqdm
+    for _ in range(num_epochs):
+        train_loader = Data.create_dataloader(train_set, train_opt, 'train')
+        bar = tqdm(train_loader)
+        for data in bar:
+
+            ch0 = data['target'].cuda()
+            ch1 = data['input'].cuda()
+            idx += len(ch0)
+            t_float_arr = torch.Tensor(np.random.rand(ch0.shape[0], num_bins)).cuda()
+            for i in range(t_float_arr.shape[1]):
+                inp = ch0* (1-t_float_arr[:,i].reshape(-1,1,1,1)) + ch1 * (t_float_arr[:,i]).reshape(-1,1,1,1)
+                xt_normalizer1.normalize(inp, t_float_arr[:,i], update=True)
+            # if idx > 100:
+            #     break
+    return xt_normalizer1
+ 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--config', type=str, default='config/sr_sr3_16_128.json',
@@ -177,7 +237,11 @@ if __name__ == "__main__":
     # 
     dummy_normalizer_flag = opt['datasets'].get('normalize_channels', False) is True
     # train the normalizers if we are not normalizing the channels.  
-    xt_normalizer1, xt_normalizer2 = get_xt_normalizer(train_set, opt['datasets']['train'], dummy=dummy_normalizer_flag,num_bins=100, num_epochs=10)
+    if opt['datasets']['train']['name'] == 'goPro2017dehazing':
+        xt_normalizer1= get_xt_normalizer_restoration(train_set, opt['datasets']['train'], dummy=dummy_normalizer_flag,num_bins=100, num_epochs=1)
+        xt_normalizer2 = None
+    else:
+        xt_normalizer1, xt_normalizer2 = get_xt_normalizer(train_set, opt['datasets']['train'], dummy=dummy_normalizer_flag,num_bins=100, num_epochs=10)
 
     opt['model']['xt_normalizer_1'] = xt_normalizer1
     opt['model']['xt_normalizer_2'] = xt_normalizer2
@@ -246,10 +310,11 @@ if __name__ == "__main__":
                         # input_img = Metrics.tensor2img(input, min_max=[input.min(), input.max()])  # uint8
                         target_arr = []
                         pred_arr = []
-                        mean_target = val_set.get_input_target_normalization_dict()['mean_target']
-                        std_target = val_set.get_input_target_normalization_dict()['std_target']
+                        mean_target = val_set.get_input_target_normalization_dict()['mean_channel']
+                        std_target = val_set.get_input_target_normalization_dict()['std_channel']
                         mean_input = val_set.get_input_target_normalization_dict()['mean_input']
                         std_input = val_set.get_input_target_normalization_dict()['std_input']
+                        
                         assert input.shape[0] == 1
                         assert target.shape[0] == 1
                         assert prediction.shape[0] == 1

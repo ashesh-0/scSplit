@@ -105,6 +105,7 @@ def define_G(opt):
     elif model_opt['which_model_G'] == 'indi':
         netG_class = InDI
         unet_class = UNetDdpm
+        model_kwargs['xt_normalizer'] = model_opt.get('xt_normalizer_1', None)
         # model_kwargs['normalize_xt'] = model_opt.get('normalize_xt', False)
     elif model_opt['which_model_G'] == 'joint_indi':
         netG_class = JointIndi

@@ -26,7 +26,7 @@ class InDI(GaussianDiffusion):
         val_schedule_opt=None,
         e = 0.01,
         time_predictor=None,
-        xt_normalizer=False,
+        xt_normalizer=None,
     ):
         super().__init__(denoise_fn, image_size, channels=channels, loss_type=loss_type, conditional=conditional, 
                          lr_reduction=lr_reduction,
@@ -84,12 +84,11 @@ class InDI(GaussianDiffusion):
         device = x_in.device
         sample_inter = (1 | (num_timesteps//20))
         assert self.conditional is False
-        b = x_in.shape[0]
-        assert x_in.shape[1] == 1, "Only one channel is supported."
+        # b = x_in.shape[0]
+        # assert x_in.shape[1] == 1, "Only one channel is supported."
 
-        factor = self.out_channel // x_in.shape[1]
-        x_in = torch.cat([x_in]*factor, dim=1)
-        
+        # factor = self.out_channel // x_in.shape[1]
+        # x_in = torch.cat([x_in]*factor, dim=1)
         x_t = x_in + torch.randn_like(x_in)*self.get_t_times_e(torch.Tensor([t_float_start]).to(device))
         delta = t_float_start / num_timesteps
         cur_t = t_float_start
@@ -193,8 +192,8 @@ class InDI(GaussianDiffusion):
         else:
             x_start = x_in['target']
             x_end = x_in['input']
-            factor = self.out_channel // x_end.shape[1]
-            x_end = torch.concat([x_end]*factor, dim=1)
+            # factor = self.out_channel // x_end.shape[1]
+            # x_end = torch.concat([x_end]*factor, dim=1)
             b, *_ = x_start.shape
             t_float = self.sample_t(b, x_start.device)
             x_clean = self.get_xt_clean(x_start=x_start, x_end=x_end, t=t_float)
@@ -208,7 +207,9 @@ class InDI(GaussianDiffusion):
 
     def p_losses(self, x_in, noise=None):
         x_start = x_in['target']
-        x_recon, _ = self.get_prediction_during_training(x_in, noise=noise)    
+        x_recon, _ = self.get_prediction_during_training(x_in, noise=noise)   
+        device = x_start.device
+        x_start = self._xt_normalizer.normalize(x_start, torch.Tensor([0.0]*len(x_start)).to(device), update=False)
         loss = self.loss_func(x_start, x_recon)
 
         return loss

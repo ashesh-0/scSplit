@@ -94,12 +94,16 @@ class DDPM(BaseModel):
                     # clip_denoised=clip_denoised,
                     continuous=continuous)
             else:
-                assert len(self.data['input'].shape) ==1, "input is currently not being used"
-                ch1 = self.data['target'][:,:1]
-                ch2 = self.data['target'][:,1:]
+                if len(self.data['input'].shape) ==1:
+                    ch1 = self.data['target'][:,:1]
+                    ch2 = self.data['target'][:,1:]
+                    inp1, inp2 = self.netG.get_xt_clean(ch1, ch2, torch.Tensor([0.5]*len(ch1)).to(ch1.device), update=True)
+                else:
+                    ch1 = self.data['target']
+                    ch2 = self.data['input']
+                    inp1 = self.netG.get_xt_clean(ch1, ch2, torch.Tensor([0.999]*len(ch1)).to(ch1.device), update=True)
                 # the hope is that with time, once the statistics are learned, both inp1 and inp2 will be the same.
                 # normalization happens here. 
-                inp1, inp2 = self.netG.get_xt_clean(ch1, ch2, torch.Tensor([0.5]*len(ch1)).to(ch1.device), update=True)
                 self.prediction = self.netG.inference(inp1,continuous=continuous)
 
         self.netG.train()

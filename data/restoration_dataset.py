@@ -17,6 +17,10 @@ class RestorationDataset(SplitDataset):
         }
         return output_dict
     
+    # def patch_location(self, index):
+    #     loc = super().patch_location(index)
+    #     return (loc[0],0,*loc[1:])
+    
     def __getitem__(self, index):
 
         frame_idx, h_idx, w_idx = self._get_location(index)

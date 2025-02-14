@@ -50,10 +50,13 @@ def get_train_val_test_data(datalocation:DataLocation):
     if datasplit_type in ['train','val']:
         train_fpaths, val_fpaths = get_train_val_fpaths(rootdir, val_ratio=0.1)
         if datasplit_type == 'train':
+            print('Loading train data')
             fpaths = train_fpaths
         else:
+            print('Loading val data')
             fpaths = val_fpaths
     elif datasplit_type == 'test':
+        print('Loading test data')
         fpaths = get_test_fpaths(rootdir)
     else:
         raise ValueError(f"Unknown datasplit type: {datasplit_type}")

@@ -31,7 +31,7 @@ def add_git_info(opt):
     opt['git']['latest_commit'] = repo.head.object.hexsha
 
 
-def get_datasets(opt, tiled_pred=False):
+def get_datasets(opt, tiled_pred=False, eval_datasplit_type='val'):
     patch_size = opt['datasets']['patch_size']
     target_channel_idx = opt['datasets'].get('target_channel_idx', None)
     upper_clip = opt['datasets'].get('upper_clip', None)
@@ -54,7 +54,7 @@ def get_datasets(opt, tiled_pred=False):
         return train_set, val_set
     elif data_type == 'goPro2017dehazing':
         train_data_location = DataLocation(directory=(opt['datasets']['train']['datapath']), datasplit_type='train')
-        val_data_location = DataLocation(directory=(opt['datasets']['val']['datapath']), datasplit_type='val')
+        val_data_location = DataLocation(directory=(opt['datasets']['val']['datapath']), datasplit_type=eval_datasplit_type)
 
         train_set = RestorationDataset(data_type, train_data_location, patch_size, 
                                 target_channel_idx=target_channel_idx, 
@@ -69,10 +69,10 @@ def get_datasets(opt, tiled_pred=False):
         if not tiled_pred:
             class_obj = RestorationDataset 
         else:
-            raise NotImplementedError('Tiled prediction not implemented yet')
-            data_shape = (96, 900, 1400)
-            tile_manager = get_tile_manager(data_shape, (1, patch_size//2, patch_size//2), (1, patch_size, patch_size))
-            class_obj = get_tiling_dataset(SplitDataset, tile_manager)
+            # TODO: for test vs val, we need a different data shape.
+            data_shape = (210,  3, 720, 1280)
+            tile_manager = get_tile_manager(data_shape, (1, 3, patch_size//2, patch_size//2), (1,3,patch_size, patch_size))
+            class_obj = get_tiling_dataset(RestorationDataset, tile_manager)
 
         val_set = class_obj(data_type, val_data_location, patch_size, target_channel_idx=target_channel_idx,
                             normalization_dict=train_set.normalization_dict,

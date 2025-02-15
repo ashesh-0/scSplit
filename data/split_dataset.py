@@ -19,7 +19,7 @@ def load_data(data_type, dataloc:DataLocation)->Dict[int, List[np.ndarray]]:
         for i in range(data_arr.shape[-1]):
             data_dict[i] = [x for x in data_arr[...,i]]
         return data_dict
-    elif data_type == 'COSEM_jrc-hela':
+    elif data_type in ['COSEM_jrc-hela', 'COSEM_jrc-choroid-plexus-2']:
         data = imread(dataloc.directory, plugin='tifffile')
         print('Read from', dataloc.directory, data.shape)
         data_dict = {}

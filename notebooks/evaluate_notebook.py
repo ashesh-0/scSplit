@@ -40,7 +40,7 @@ if __name__ == '__main__':
     print(output_fpath, '\n', output_config_fpath)
     pm.execute_notebook(
         args.notebook,
-        os.path.join(args.outputdir,os.path.basename(args.notebook)),
+        output_fpath,
         parameters = {
             'ckpt': args.ckpt,
             'num_epochs_normalization': args.num_epochs_normalization,

@@ -24,7 +24,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # get a year-month-day hour-minute formatted string
-    param_str = f"T-{args.mixing_t_ood}_MMSE-{args.mmse_count}_InferT-{int(args.infer_time)}"
+    param_str = f"T-{args.mixing_t_ood}_MMSE-{args.mmse_count}_InferT-{int(args.infer_time)}_InferTAgg-{int(args.use_aggregated_inferred_time)}_FixedT-{args.use_hardcoded_time_for_inference}"
     now = datetime.now().strftime("%Y%m%d.%H.%M")
     outputdir = os.path.join(args.outputdir, args.ckpt.replace('/','_'))
     fname = os.path.basename(args.notebook)
@@ -52,6 +52,9 @@ if __name__ == '__main__':
             'mmse_count': args.mmse_count,
             'num_timesteps': args.num_timesteps,
             'enable_real_input': args.enable_real_input,
-            'infer_time': args.infer_time
+            'infer_time': args.infer_time,
+            'use_aggregated_inferred_time': args.use_aggregated_inferred_time,
+            'use_hardcoded_time_for_inference': args.use_hardcoded_time_for_inference
         }
     )
+    

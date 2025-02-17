@@ -149,7 +149,7 @@ def get_xt_normalizer(train_set,train_opt, num_bins=100, num_epochs=1, dummy=Fal
     
     from tqdm import tqdm
     for _ in range(num_epochs):
-        train_loader = Data.create_dataloader(train_set, train_opt, 'train')
+        train_loader = torch.utils.data.DataLoader(train_set, batch_size=64, shuffle=False, num_workers=4)
         bar = tqdm(train_loader)
         for data in bar:
             ch1 = data['target'][:,0:1].cuda()

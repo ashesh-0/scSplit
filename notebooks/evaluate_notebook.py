@@ -18,6 +18,9 @@ if __name__ == '__main__':
     parser.add_argument('--num_timesteps', type=int, help='Number of timesteps to use', default=1)
     parser.add_argument('--enable_real_input', type=bool, help='Enable real input', default=False)
     parser.add_argument('--infer_time', type=bool, help='Infer time', default=False)
+    parser.add_argument('--use_aggregated_inferred_time', type=bool, help='Use aggregated inferred time', default=False)
+    parser.add_argument('--use_hardcoded_time_for_inference', type=float, help='Use hardcoded time for inference', default=None)
+
     args = parser.parse_args()
 
     # get a year-month-day hour-minute formatted string

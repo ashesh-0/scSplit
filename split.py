@@ -70,8 +70,8 @@ def get_datasets(opt, tiled_pred=False, eval_datasplit_type='val'):
             class_obj = RestorationDataset 
         else:
             # TODO: for test vs val, we need a different data shape.
-            data_shape = (210,  3, 720, 1280)
-            tile_manager = get_tile_manager(data_shape, (1, 3, patch_size//2, patch_size//2), (1,3,patch_size, patch_size))
+            data_shape = (1111,  720, 1280)
+            tile_manager = get_tile_manager(data_shape, (1, patch_size//2, patch_size//2), (1,patch_size, patch_size))
             class_obj = get_tiling_dataset(RestorationDataset, tile_manager)
 
         val_set = class_obj(data_type, val_data_location, patch_size, target_channel_idx=target_channel_idx,

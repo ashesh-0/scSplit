@@ -123,7 +123,7 @@ def get_datasets(opt, tiled_pred=False, eval_datasplit_type='val'):
             if data_type == 'Hagen':
                 data_shape = (10, 2048, 2048)
             elif data_type in ['HT_LIF', 'HT_LIF24']:
-                data_shape = (12, 1608, 1608)
+                data_shape = (10, 1608, 1608)
             elif data_type == 'COSEM_jrc-hela':
                 data_shape = (96, 900, 1400)
             tile_manager = get_tile_manager(data_shape, (1, patch_size//2, patch_size//2), (1, patch_size, patch_size))

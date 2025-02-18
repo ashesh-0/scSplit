@@ -126,6 +126,8 @@ def get_datasets(opt, tiled_pred=False, eval_datasplit_type='val'):
                 data_shape = (10, 1608, 1608)
             elif data_type == 'COSEM_jrc-hela':
                 data_shape = (96, 900, 1400)
+            elif data_type == 'COSEM_jrc-choroid-plexus-2':
+                data_shape = (96, 900, 1220)
             tile_manager = get_tile_manager(data_shape, (1, patch_size//2, patch_size//2), (1, patch_size, patch_size))
             class_obj = get_tiling_dataset(SplitDataset, tile_manager)
 

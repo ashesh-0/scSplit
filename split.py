@@ -41,7 +41,7 @@ def get_datasets(opt, tiled_pred=False, eval_datasplit_type='val'):
     data_type = opt['datasets']['train']['name']  
     uncorrelated_channels = opt['datasets']['train']['uncorrelated_channels']
     allowed_dsets = ['cifar10', 'Hagen', "RRW", "HT_LIF24", "COSEM_jrc-hela", "goPro2017dehazing", 
-                     "COSEM_jrc-choroid-plexus-2", "HT_T24"]
+                     "COSEM_jrc-choroid-plexus-2", "HT_T24","BioSR"]
     assert data_type in allowed_dsets, f"Only one of {allowed_dsets} datasets are supported. Found {data_type}"
     if data_type == 'RRW':
         rootdir = opt['datasets']['datapath']
@@ -98,7 +98,7 @@ def get_datasets(opt, tiled_pred=False, eval_datasplit_type='val'):
             val_data_location = DataLocation(channelwise_fpath=(opt['datasets']['val']['datapath']['ch0'],
                                                             opt['datasets']['val']['datapath']['ch1']))
         elif data_type in ['cifar10', 'HT_LIF24', 'COSEM_jrc-hela', 
-                           'COSEM_jrc-choroid-plexus-2', 'HT_T24']:
+                           'COSEM_jrc-choroid-plexus-2', 'HT_T24', 'BioSR']:
             train_data_location = DataLocation(directory=(opt['datasets']['train']['datapath']))
             val_data_location = DataLocation(directory=(opt['datasets']['val']['datapath']))
             extra_kwargs['input_channel_idx'] = opt['datasets']['input_channel_idx'] if 'input_channel_idx' in opt['datasets'] else None
@@ -133,6 +133,9 @@ def get_datasets(opt, tiled_pred=False, eval_datasplit_type='val'):
             elif data_type =='HT_T24':
                 raise ValueError('Not implemented')
                 data_shape = (36, None, None)
+            elif data_type == 'BioSR':
+                raise ValueError('Not implemented')
+                data_shape = (10, 2048, 2048)
             
             tile_manager = get_tile_manager(data_shape, (1, patch_size//2, patch_size//2), (1, patch_size, patch_size))
 
@@ -259,7 +262,7 @@ if __name__ == "__main__":
         xt_normalizer1= get_xt_normalizer_restoration(train_set, opt['datasets']['train'], dummy=dummy_normalizer_flag,num_bins=100, num_epochs=1)
         xt_normalizer2 = None
     else:
-        xt_normalizer1, xt_normalizer2 = get_xt_normalizer(train_set, opt['datasets']['train'], dummy=dummy_normalizer_flag,num_bins=100, num_steps=10000)
+        xt_normalizer1, xt_normalizer2 = get_xt_normalizer(train_set, opt['datasets']['train'], dummy=dummy_normalizer_flag,num_bins=100, num_steps=1000)
 
     opt['model']['xt_normalizer_1'] = xt_normalizer1
     opt['model']['xt_normalizer_2'] = xt_normalizer2

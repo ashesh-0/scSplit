@@ -40,7 +40,8 @@ def get_datasets(opt, tiled_pred=False, eval_datasplit_type='val'):
 
     data_type = opt['datasets']['train']['name']  
     uncorrelated_channels = opt['datasets']['train']['uncorrelated_channels']
-    allowed_dsets = ['cifar10', 'Hagen', "RRW", "HT_LIF24", "COSEM_jrc-hela", "goPro2017dehazing", "COSEM_jrc-choroid-plexus-2"]
+    allowed_dsets = ['cifar10', 'Hagen', "RRW", "HT_LIF24", "COSEM_jrc-hela", "goPro2017dehazing", 
+                     "COSEM_jrc-choroid-plexus-2", "HT_T24"]
     assert data_type in allowed_dsets, f"Only one of {allowed_dsets} datasets are supported. Found {data_type}"
     if data_type == 'RRW':
         rootdir = opt['datasets']['datapath']
@@ -96,7 +97,8 @@ def get_datasets(opt, tiled_pred=False, eval_datasplit_type='val'):
                                                             opt['datasets']['train']['datapath']['ch1']))
             val_data_location = DataLocation(channelwise_fpath=(opt['datasets']['val']['datapath']['ch0'],
                                                             opt['datasets']['val']['datapath']['ch1']))
-        elif data_type in ['cifar10', 'HT_LIF24', 'COSEM_jrc-hela', 'COSEM_jrc-choroid-plexus-2']:
+        elif data_type in ['cifar10', 'HT_LIF24', 'COSEM_jrc-hela', 
+                           'COSEM_jrc-choroid-plexus-2', 'HT_T24']:
             train_data_location = DataLocation(directory=(opt['datasets']['train']['datapath']))
             val_data_location = DataLocation(directory=(opt['datasets']['val']['datapath']))
             extra_kwargs['input_channel_idx'] = opt['datasets']['input_channel_idx'] if 'input_channel_idx' in opt['datasets'] else None
@@ -128,7 +130,12 @@ def get_datasets(opt, tiled_pred=False, eval_datasplit_type='val'):
                 data_shape = (96, 900, 1400)
             elif data_type == 'COSEM_jrc-choroid-plexus-2':
                 data_shape = (96, 900, 1220)
+            elif data_type =='HT_T24':
+                raise ValueError('Not implemented')
+                data_shape = (36, None, None)
+            
             tile_manager = get_tile_manager(data_shape, (1, patch_size//2, patch_size//2), (1, patch_size, patch_size))
+
             class_obj = get_tiling_dataset(SplitDataset, tile_manager)
 
         val_set = class_obj(data_type, val_data_location, patch_size, target_channel_idx=target_channel_idx,
@@ -153,6 +160,7 @@ def get_xt_normalizer(train_set,train_opt, num_bins=100, num_epochs=1, dummy=Fal
     for _ in range(num_epochs):
         train_loader = torch.utils.data.DataLoader(train_set, batch_size=64, shuffle=False, num_workers=4)
         bar = tqdm(train_loader)
+        idx = 0
         for data in bar:
             ch1 = data['target'][:,0:1].cuda()
             ch2 = data['target'][:,1:2].cuda()
@@ -161,6 +169,9 @@ def get_xt_normalizer(train_set,train_opt, num_bins=100, num_epochs=1, dummy=Fal
                 inp = ch1* t_float_arr[:,i].reshape(-1,1,1,1) + ch2 * (1-t_float_arr[:,i]).reshape(-1,1,1,1)
                 xt_normalizer1.normalize(inp, 1 - t_float_arr[:,i], update=True)
                 xt_normalizer2.normalize(inp, t_float_arr[:,i], update=True)
+            idx += len(ch1)
+            # if idx > 100:
+            #     break
     return xt_normalizer1, xt_normalizer2
 
 def get_xt_normalizer_restoration(train_set,train_opt, num_bins=100, num_epochs=1, dummy=False):
@@ -301,7 +312,7 @@ if __name__ == "__main__":
                     for _,  val_data in enumerate(val_loader):
                         idx += 1
                         # if idx == 20:
-                            # break
+                        #     break
                         diffusion.feed_data(val_data)
                         diffusion.test(continuous=False)
                         visuals = diffusion.get_current_visuals()

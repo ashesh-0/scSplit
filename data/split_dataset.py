@@ -13,7 +13,7 @@ from data.goprodehazing2017_data import get_train_val_test_data as load_gopro_da
 def load_data(data_type, dataloc:DataLocation)->Dict[int, List[np.ndarray]]:
     if data_type == 'cifar10':
         return load_cifar10_data(dataloc.directory, [1,7])
-    elif data_type == 'HT_LIF24':
+    elif data_type in ['HT_LIF24', 'HT_T24']:
         data_arr = load_HT_LIF_data(dataloc.directory)
         data_dict = {}
         for i in range(data_arr.shape[-1]):

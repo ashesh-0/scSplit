@@ -149,7 +149,7 @@ def get_datasets(opt, tiled_pred=False, eval_datasplit_type='val'):
                             **extra_kwargs)
         return train_set, val_set
 
-def get_xt_normalizer(train_set,train_opt, num_bins=100, num_epochs=1, dummy=False):
+def get_xt_normalizer(train_set,train_opt, num_bins=100, num_steps=10000, dummy=False):
     xt_normalizer1 = NormalizerXT(num_bins=num_bins)
     xt_normalizer2 = NormalizerXT(num_bins=num_bins)
     if dummy:
@@ -157,10 +157,10 @@ def get_xt_normalizer(train_set,train_opt, num_bins=100, num_epochs=1, dummy=Fal
         return None, None #xt_normalizer1, xt_normalizer2
     
     from tqdm import tqdm
-    for _ in range(num_epochs):
+    idx = 0
+    for _ in range(10000):
         train_loader = torch.utils.data.DataLoader(train_set, batch_size=64, shuffle=False, num_workers=4)
         bar = tqdm(train_loader)
-        idx = 0
         for data in bar:
             ch1 = data['target'][:,0:1].cuda()
             ch2 = data['target'][:,1:2].cuda()
@@ -170,8 +170,10 @@ def get_xt_normalizer(train_set,train_opt, num_bins=100, num_epochs=1, dummy=Fal
                 xt_normalizer1.normalize(inp, 1 - t_float_arr[:,i], update=True)
                 xt_normalizer2.normalize(inp, t_float_arr[:,i], update=True)
             idx += len(ch1)
-            # if idx > 100:
-            #     break
+            bar.set_description(f'{idx} patches processed')
+
+            if idx > num_steps:
+                break
     return xt_normalizer1, xt_normalizer2
 
 def get_xt_normalizer_restoration(train_set,train_opt, num_bins=100, num_epochs=1, dummy=False):
@@ -194,6 +196,7 @@ def get_xt_normalizer_restoration(train_set,train_opt, num_bins=100, num_epochs=
             for i in range(t_float_arr.shape[1]):
                 inp = ch0* (1-t_float_arr[:,i].reshape(-1,1,1,1)) + ch1 * (t_float_arr[:,i]).reshape(-1,1,1,1)
                 xt_normalizer1.normalize(inp, t_float_arr[:,i], update=True)
+            bar.set_description(f'{idx} patches processed')
             # if idx > 100:
             #     break
     return xt_normalizer1
@@ -254,7 +257,7 @@ if __name__ == "__main__":
         xt_normalizer1= get_xt_normalizer_restoration(train_set, opt['datasets']['train'], dummy=dummy_normalizer_flag,num_bins=100, num_epochs=1)
         xt_normalizer2 = None
     else:
-        xt_normalizer1, xt_normalizer2 = get_xt_normalizer(train_set, opt['datasets']['train'], dummy=dummy_normalizer_flag,num_bins=100, num_epochs=10)
+        xt_normalizer1, xt_normalizer2 = get_xt_normalizer(train_set, opt['datasets']['train'], dummy=dummy_normalizer_flag,num_bins=100, num_steps=10000)
 
     opt['model']['xt_normalizer_1'] = xt_normalizer1
     opt['model']['xt_normalizer_2'] = xt_normalizer2

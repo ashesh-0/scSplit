@@ -174,6 +174,8 @@ def get_xt_normalizer(train_set,train_opt, num_bins=100, num_steps=10000, dummy=
 
             if idx > num_steps:
                 break
+        if idx > num_steps:
+            break
     return xt_normalizer1, xt_normalizer2
 
 def get_xt_normalizer_restoration(train_set,train_opt, num_bins=100, num_epochs=1, dummy=False):

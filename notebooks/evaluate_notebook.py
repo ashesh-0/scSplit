@@ -11,7 +11,7 @@ if __name__ == '__main__':
     parser.add_argument('--outputdir', type=str, help='Output notebook directory', default='/group/jug/ashesh/indiSplit/notebook_results/')
     # parser.add_argument('parameters', type=str, help='Parameters for the notebook')
     parser.add_argument('--ckpt', type=str, help='Checkpoint to use. eg. 2502/Hagen-joint_indi-l1/57')
-    parser.add_argument('--num_epochs_normalization', type=int, help='Number of epochs for normalization', default=50)
+    parser.add_argument('--num_steps_normalization', type=int, help='Number of epochs for normalization', default=50)
     parser.add_argument('--ckpt_time_predictor', type=str, help='Checkpoint for time predictor', default=None)
     parser.add_argument('--mixing_t_ood', type=float, help='Mixing parameter for input generation', default=0.5)
     parser.add_argument('--mmse_count', type=int, help='Number of mmse values to generate', default=10)
@@ -46,7 +46,7 @@ if __name__ == '__main__':
         output_fpath,
         parameters = {
             'ckpt': args.ckpt,
-            'num_epochs_normalization': args.num_epochs_normalization,
+            'num_steps_normalization': args.num_steps_normalization,
             'ckpt_time_predictor': args.ckpt_time_predictor,
             'mixing_t_ood': args.mixing_t_ood,
             'mmse_count': args.mmse_count,

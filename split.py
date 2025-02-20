@@ -152,6 +152,28 @@ def get_datasets(opt, tiled_pred=False, eval_datasplit_type='val'):
                             **extra_kwargs)
         return train_set, val_set
 
+def get_real_input_normalizer(train_set, train_opt, num_steps=1, dummy=False):
+    xt_normalizer1 = NormalizerXT(num_bins=1)
+    if dummy:
+        print('--------Dummy Normalizer Activated--------')
+        return None, None #xt_normalizer1, xt_normalizer2
+    
+    from tqdm import tqdm
+    idx = 0
+    bar = tqdm(range(10000))
+    for _ in bar:
+        train_loader = Data.create_dataloader(train_set, train_opt, 'train')
+        for data in train_loader:
+            idx +=1
+            ch_inp = data['input'].cuda()
+            t_float_arr = torch.Tensor(np.random.rand(ch_inp.shape[0])).cuda()
+            xt_normalizer1.normalize(ch_inp, t_float_arr, update=True)
+            bar.set_description(f'{idx}/{num_steps} patches processed')
+            if idx > num_steps:
+                return xt_normalizer1
+            
+    return xt_normalizer1
+
 def get_xt_normalizer(train_set,train_opt, num_bins=100, num_steps=10000, dummy=False):
     xt_normalizer1 = NormalizerXT(num_bins=num_bins)
     xt_normalizer2 = NormalizerXT(num_bins=num_bins)
@@ -181,7 +203,7 @@ def get_xt_normalizer(train_set,train_opt, num_bins=100, num_steps=10000, dummy=
             break
     return xt_normalizer1, xt_normalizer2
 
-def get_xt_normalizer_restoration(train_set,train_opt, num_bins=100, num_epochs=1, dummy=False):
+def get_xt_normalizer_restoration(train_set,train_opt, num_bins=100, num_steps=10000, dummy=False):
     xt_normalizer1 = NormalizerXT(num_bins=num_bins)
     if dummy:
         print('--------Dummy Normalizer Activated--------')
@@ -189,7 +211,7 @@ def get_xt_normalizer_restoration(train_set,train_opt, num_bins=100, num_epochs=
     
     idx = 0
     from tqdm import tqdm
-    for _ in range(num_epochs):
+    for _ in range(10000):
         train_loader = Data.create_dataloader(train_set, train_opt, 'train')
         bar = tqdm(train_loader)
         for data in bar:
@@ -202,8 +224,9 @@ def get_xt_normalizer_restoration(train_set,train_opt, num_bins=100, num_epochs=
                 inp = ch0* (1-t_float_arr[:,i].reshape(-1,1,1,1)) + ch1 * (t_float_arr[:,i]).reshape(-1,1,1,1)
                 xt_normalizer1.normalize(inp, t_float_arr[:,i], update=True)
             bar.set_description(f'{idx} patches processed')
-            # if idx > 100:
-            #     break
+            if idx > num_steps:
+                return xt_normalizer1
+    
     return xt_normalizer1
  
 if __name__ == "__main__":

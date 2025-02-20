@@ -56,13 +56,14 @@ def get_datasets(opt, tiled_pred=False, eval_datasplit_type='val'):
     elif data_type == 'goPro2017dehazing':
         train_data_location = DataLocation(directory=(opt['datasets']['train']['datapath']), datasplit_type='train')
         val_data_location = DataLocation(directory=(opt['datasets']['val']['datapath']), datasplit_type=eval_datasplit_type)
-
+        mix_target_max_factor = opt['datasets'].get('mix_target_max_factor', 0.0)
         train_set = RestorationDataset(data_type, train_data_location, patch_size, 
                                 target_channel_idx=target_channel_idx, 
                                     max_qval=max_qval, upper_clip=upper_clip,
                                     uncorrelated_channels=uncorrelated_channels,
                                     channel_weights=channel_weights,
                                 normalization_dict=None, enable_transforms=True,random_patching=True, 
+                                mix_target_max_factor=mix_target_max_factor,
                                 # input_from_normalized_target=input_from_normalized_target,
                                 # **extra_kwargs,
                                 # **train_kwargs
@@ -211,10 +212,11 @@ def get_xt_normalizer_restoration(train_set,train_opt, num_bins=100, num_steps=1
     
     idx = 0
     from tqdm import tqdm
-    for _ in range(10000):
+    bar = tqdm(range(10000))
+    for _ in bar:
         train_loader = Data.create_dataloader(train_set, train_opt, 'train')
-        bar = tqdm(train_loader)
-        for data in bar:
+        # bar = tqdm(train_loader)
+        for data in train_loader:
 
             ch0 = data['target'].cuda()
             ch1 = data['input'].cuda()
@@ -223,7 +225,7 @@ def get_xt_normalizer_restoration(train_set,train_opt, num_bins=100, num_steps=1
             for i in range(t_float_arr.shape[1]):
                 inp = ch0* (1-t_float_arr[:,i].reshape(-1,1,1,1)) + ch1 * (t_float_arr[:,i]).reshape(-1,1,1,1)
                 xt_normalizer1.normalize(inp, t_float_arr[:,i], update=True)
-            bar.set_description(f'{idx} patches processed')
+            bar.set_description(f'{idx}/{num_steps} patches processed')
             if idx > num_steps:
                 return xt_normalizer1
     
@@ -282,7 +284,7 @@ if __name__ == "__main__":
     dummy_normalizer_flag = opt['datasets'].get('normalize_channels', False) is True
     # train the normalizers if we are not normalizing the channels.  
     if opt['datasets']['train']['name'] == 'goPro2017dehazing':
-        xt_normalizer1= get_xt_normalizer_restoration(train_set, opt['datasets']['train'], dummy=dummy_normalizer_flag,num_bins=100, num_epochs=1)
+        xt_normalizer1= get_xt_normalizer_restoration(train_set, opt['datasets']['train'], dummy=dummy_normalizer_flag,num_bins=100, num_steps=1000)
         xt_normalizer2 = None
     else:
         xt_normalizer1, xt_normalizer2 = get_xt_normalizer(train_set, opt['datasets']['train'], dummy=dummy_normalizer_flag,num_bins=100, num_steps=1000)

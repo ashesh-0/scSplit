@@ -1,8 +1,41 @@
-from data.split_dataset import SplitDataset
+from data.split_dataset import SplitDataset, DataLocation
 import numpy as np
 
 class RestorationDataset(SplitDataset):
-    
+    def __init__(self, data_type, data_location:DataLocation, patch_size, 
+                 target_channel_idx = None,
+                 input_channel_idx=None,
+                 random_patching=False, 
+                 enable_transforms=False,
+                 max_qval=0.98,
+                 normalization_dict=None,
+                 uncorrelated_channels=False,
+                 channel_weights=None,
+                 input_from_normalized_target=False,
+                 real_input_fraction=None,
+                 upper_clip=False,
+                 normalize_channels=True,
+                 mix_target_max_factor=0.5):
+        super().__init__(data_type, data_location, patch_size, 
+                 target_channel_idx=target_channel_idx,
+                 input_channel_idx=input_channel_idx,
+                 random_patching=random_patching, 
+                 enable_transforms=enable_transforms,
+                 max_qval=max_qval,
+                 normalization_dict=normalization_dict,
+                 uncorrelated_channels=uncorrelated_channels,
+                 channel_weights=channel_weights,
+                 input_from_normalized_target=input_from_normalized_target,
+                 real_input_fraction=real_input_fraction,
+                 upper_clip=upper_clip,
+                 normalize_channels=normalize_channels)
+        self._mix_target_max_factor = mix_target_max_factor
+        # do we want to mix the target with the input to create the input?
+        assert self._mix_target_max_factor >= 0 and self._mix_target_max_factor <= 1, "mix_target_max_factor must be between 0 and 1"
+        if self._mix_target_max_factor > 0:
+            print(f'[{self.__class__.__name__}] {self._mix_target_max_factor} of target will be mixed with input')
+
+
     def get_input_target_normalization_dict(self):
         mean_input = self.normalization_dict['mean_input'].copy()
         std_input = self.normalization_dict['std_input'].copy()
@@ -57,5 +90,12 @@ class RestorationDataset(SplitDataset):
             patch_arr = [x[None] for x in patch_arr]
 
         assert len(patch_arr) == 2, "Input & target must be a pair"
-        return {'target': patch_arr[0], 'input': patch_arr[1]}
+        output_dict = {'target': patch_arr[0], 'input': patch_arr[1]}
+        if self._mix_target_max_factor>0:
+            factor = np.random.rand()*self._mix_target_max_factor
+            output_dict['input'] = output_dict['input'] * (1-factor) + output_dict['target'] * factor
+            output_dict['target_factor'] = factor
+        
+        return output_dict
+
     

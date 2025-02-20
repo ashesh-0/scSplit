@@ -17,7 +17,7 @@
         "upper_clip": false,
         "patch_size": 512,
         "max_qval": 1.0,
-        // "channel_weights": [1.0, 1.0],
+        "mix_target_max_factor": 0.5,
         "train": {
             "name": "goPro2017dehazing",
             "datapath": "/group/jug/ashesh/data/goproDeblurring2017/GOPRO_Large",
@@ -29,7 +29,6 @@
         },
         "val": {
             "name": "goPro2017dehazing",
-            // "target_channel_idx": 0, // If set then we do image translation from input to this channel 
             "datapath": "/group/jug/ashesh/data/goproDeblurring2017/GOPRO_Large",
             "patch_size": 512,
             "datatype": "img" //lmdb or img, path of img files
@@ -55,9 +54,9 @@
                 2,
                 4,
                 8
-                8
-                16,
-                16
+                // 8
+                // 16,
+                // 16
             ],
             "attn_res": [
                 // 16

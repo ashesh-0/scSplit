@@ -26,7 +26,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # get a year-month-day hour-minute formatted string
-    param_str = f"T-{args.mixing_t_ood}_MMSE-{args.mmse_count}_InferT-{int(args.infer_time)}_InferTAgg-{int(args.use_aggregated_inferred_time)}_FixedT-{args.use_hardcoded_time_for_inference}"
+    param_str = f"T-{args.mixing_t_ood}_InpIdx-{args.input_channel_idx}_MMSE-{args.mmse_count}_InferT-{int(args.infer_time)}_InferTAgg-{int(args.use_aggregated_inferred_time)}_FixedT-{args.use_hardcoded_time_for_inference}"
     now = datetime.now().strftime("%Y%m%d.%H.%M")
     outputdir = os.path.join(args.outputdir, args.ckpt.replace('/','_'))
     fname = os.path.basename(args.notebook)

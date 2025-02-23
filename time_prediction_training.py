@@ -17,6 +17,42 @@ import os
 from split import add_git_info
 from model.normalizer import NormalizerXT
 
+def get_normalizer(dset, opt, num_pixels=500_000 * 128 * 128, return_data_arr=False):
+    
+    original_flag = dset.set_random_patching(True)
+    xt_normalizer = NormalizerXT()
+    if 'normalize_channels' in opt['datasets'] and opt['datasets']['normalize_channels'] is True:
+        pass
+    else:
+        dset.reset_fixed_t()
+        data_mean_arr = []
+        data_std_arr = []
+        cnt = 0
+        idx = 0
+        for _ in tqdm(range(10000)):
+            val_loader = torch.utils.data.DataLoader(dset, batch_size=16, shuffle=True, num_workers=0)
+            bar = tqdm(val_loader)
+            for (x, t_float) in bar:
+                idx+=1
+                x = x.cuda()
+                t_float = t_float.cuda()
+                x = xt_normalizer.normalize(x,t_float, update=True)
+                cnt += np.prod(x.shape)
+                bar.set_description(f'{cnt//10e6}M/{num_pixels//10e6}M pixels processed')
+                if idx %10 == 0 and return_data_arr:
+                    data_mean_arr.append(xt_normalizer.data_mean.cpu().numpy())
+                    data_std_arr.append(xt_normalizer.data_std.cpu().numpy())
+                if cnt > num_pixels:
+                    break
+            if cnt > num_pixels:
+                break
+
+        # plt.plot(np.stack(data_mean_arr)[:,90])
+    dset.set_random_patching(original_flag)
+    if return_data_arr:
+        return xt_normalizer, data_mean_arr, data_std_arr
+    return xt_normalizer
+
 
 def get_datasets(opt, tiled_pred=False):
     patch_size = opt['datasets']['patch_size']
@@ -107,8 +143,10 @@ def start_training(opt):
         xt_normalizer_train = None
         xt_normalizer_val = None
     else:
-        xt_normalizer_train = NormalizerXT()
-        xt_normalizer_val = NormalizerXT()
+        xt_normalizer_train = get_normalizer(train_set, opt)
+        # we donot need a separate normalizer for validation set. 
+        # this is because training and validation set are drawn from the same distribution.
+        xt_normalizer_val = get_normalizer(val_set, opt)
 
     train_loader = DataLoader(train_set, batch_size=opt['datasets']['train']['batch_size'], shuffle=True, num_workers=opt['datasets']['train']['num_workers'])
     val_loader = DataLoader(val_set, batch_size=opt['datasets']['train']['batch_size'], shuffle=False, num_workers=opt['datasets']['train']['num_workers'])
@@ -142,7 +180,7 @@ def start_training(opt):
             x = x.cuda()
             t_float = t_float.cuda()
             if xt_normalizer_train is not None:
-                x = xt_normalizer_train.normalize(x,t_float, update=True)
+                x = xt_normalizer_train.normalize(x,t_float, update=False)
             
             t_float_pred = model(x)
             loss = loss_fn(t_float_pred, t_float.type(torch.float32))
@@ -162,7 +200,7 @@ def start_training(opt):
             x = x.cuda()
             t_float = t_float.cuda()
             if xt_normalizer_val is not None:
-                x = xt_normalizer_val.normalize(x,t_float, update=True)
+                x = xt_normalizer_val.normalize(x,t_float, update=False)
             t_float_pred = model(x)
             loss = loss_fn(t_float_pred, t_float.type(torch.float32))
             val_losses.append(loss.item())

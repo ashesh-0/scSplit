@@ -6,6 +6,7 @@ import os
 
 
 if __name__ == '__main__':
+    # python notebooks/evaluate_notebook.py --ckpt=2502/HT_LIF24-joint_indi-l1/60 --mmse_count=10  --notebook=/home/ashesh.ashesh/code/DiffSplitting/notebooks/EvaluateJointIndiRealInput.ipynb --ckpt_time_predictor=2501/COSEM_jrc-hela-UnetClassifier-l2/6 --ckpt=2502/COSEM_jrc-hela-joint_indi-l1/33 --infer_time=true --use_aggregated_inferred_time=true
     parser = argparse.ArgumentParser(description='Run a notebook')
     parser.add_argument('--notebook', type=str, help='Notebook to run', default='/home/ashesh.ashesh/code/DiffSplitting/notebooks/EvaluateJointIndi.ipynb')
     parser.add_argument('--outputdir', type=str, help='Output notebook directory', default='/group/jug/ashesh/indiSplit/notebook_results/')
@@ -20,6 +21,7 @@ if __name__ == '__main__':
     parser.add_argument('--infer_time', type=bool, help='Infer time', default=False)
     parser.add_argument('--use_aggregated_inferred_time', type=bool, help='Use aggregated inferred time', default=False)
     parser.add_argument('--use_hardcoded_time_for_inference', type=float, help='Use hardcoded time for inference', default=None)
+    parser.add_argument('--input_channel_idx', type=int, help='Input channel index', default=2)
 
     args = parser.parse_args()
 
@@ -54,7 +56,8 @@ if __name__ == '__main__':
             'enable_real_input': args.enable_real_input,
             'infer_time': args.infer_time,
             'use_aggregated_inferred_time': args.use_aggregated_inferred_time,
-            'use_hardcoded_time_for_inference': args.use_hardcoded_time_for_inference
+            'use_hardcoded_time_for_inference': args.use_hardcoded_time_for_inference,
+            'input_channel_idx': args.input_channel_idx
         }
     )
     

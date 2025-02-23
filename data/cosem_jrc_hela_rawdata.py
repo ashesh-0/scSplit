@@ -9,5 +9,5 @@ def load_jrc_hela_rawdata(input_fpath):
     ch2_stack = imread(ch2_fpath, plugin='tifffile')
     inp_stack = imread(input_fpath, plugin='tifffile')
     print(inp_stack.shape, ch1_stack.shape, ch2_stack.shape)
-    data_stack = np.stack([ch1_stack, ch2_stack, inp_stack[:,0]], axis=-1)
+    data_stack = np.stack([ch1_stack, ch2_stack, inp_stack[:,0], inp_stack[:,1]], axis=-1)
     return data_stack

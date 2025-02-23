@@ -64,13 +64,13 @@ def get_datasets(opt, tiled_pred=False):
     data_type = opt['datasets']['train']['name']  
     uncorrelated_channels = opt['datasets']['train']['uncorrelated_channels']
     
-    assert data_type in ['cifar10', 'Hagen','COSEM_jrc-hela', 'HT_LIF24'], f'Invalid data type: {data_type}'
+    assert data_type in ['cifar10', 'Hagen','COSEM_jrc-hela', 'HT_LIF24', "BioSR", "HT_T24"], f'Invalid data type: {data_type}'
     if data_type == 'Hagen':
         train_data_location = DataLocation(channelwise_fpath=(opt['datasets']['train']['datapath']['ch0'],
                                                         opt['datasets']['train']['datapath']['ch1']))
         val_data_location = DataLocation(channelwise_fpath=(opt['datasets']['val']['datapath']['ch0'],
                                                         opt['datasets']['val']['datapath']['ch1']))
-    elif data_type in ['cifar10', 'HT_LIF24', 'COSEM_jrc-hela']:
+    elif data_type in ['cifar10', 'HT_LIF24', 'COSEM_jrc-hela', "BioSR", "HT_T24"]:
         train_data_location = DataLocation(directory=(opt['datasets']['train']['datapath']))
         val_data_location = DataLocation(directory=(opt['datasets']['val']['datapath']))
     else:

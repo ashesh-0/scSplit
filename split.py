@@ -134,8 +134,7 @@ def get_datasets(opt, tiled_pred=False, eval_datasplit_type='val'):
             elif data_type =='HT_T24':
                 data_shape = (36, 1608, 1608)
             elif data_type == 'BioSR':
-                raise ValueError('Not implemented')
-                data_shape = (10, 2048, 2048)
+                data_shape = (5, 1004, 1004)
             
             tile_manager = get_tile_manager(data_shape, (1, patch_size//2, patch_size//2), (1, patch_size, patch_size))
 

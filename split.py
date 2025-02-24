@@ -132,8 +132,7 @@ def get_datasets(opt, tiled_pred=False, eval_datasplit_type='val'):
             elif data_type == 'COSEM_jrc-choroid-plexus-2':
                 data_shape = (96, 900, 1220)
             elif data_type =='HT_T24':
-                raise ValueError('Not implemented')
-                data_shape = (36, None, None)
+                data_shape = (36, 1608, 1608)
             elif data_type == 'BioSR':
                 raise ValueError('Not implemented')
                 data_shape = (10, 2048, 2048)

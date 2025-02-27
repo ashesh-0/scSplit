@@ -30,7 +30,12 @@ def get_paths(rootdir):
 def get_test_fpaths(rootdir):
     return get_paths(os.path.join(rootdir, 'test'))
 
-def load_data_dict(fpaths):
+def load_data_dict(fpaths, limit_count=None):
+    if limit_count is not None:
+        print('---------------------------------------------------')
+        print(f'Loading limited number of images :{limit_count}!!')
+        print('---------------------------------------------------')  
+    
     blur_imgs = []
     sharp_imgs = []
     i = 0
@@ -40,6 +45,8 @@ def load_data_dict(fpaths):
         img = Image.open(sharp_fpath)
         sharp_imgs.append(np.array(img).transpose((2,0,1)))
         i +=1
+        if limit_count is not None and i > limit_count:
+            break
         # if i > 20:
         #     break
     return {0: sharp_imgs, 1: blur_imgs}
@@ -61,7 +68,7 @@ def get_train_val_test_data(datalocation:DataLocation):
     else:
         raise ValueError(f"Unknown datasplit type: {datasplit_type}")
     
-    return load_data_dict(fpaths)
+    return load_data_dict(fpaths, limit_count=datalocation.limit_count)
 
 
 if __name__ == '__main__':

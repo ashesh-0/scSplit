@@ -7,6 +7,7 @@ class DataLocation:
     channelwise_fpath: Tuple[str]= ()
     directory: str = ''
     datasplit_type: str = ''
+    limit_count: int = None
 
     def __post_init__(self):
         assert self.fpath or len(self.channelwise_fpath) or self.directory, "At least one of the following must be provided: fpath, channelwise_fpath, directory"

@@ -282,7 +282,9 @@ class SplitDataset:
         return norm_inp.astype(np.float32)
     
     def normalize_channels(self, channel_images):
-        norm_tar = (channel_images - self.normalization_dict['mean_channel'].reshape(-1,1,1))/self.normalization_dict['std_channel'].reshape(-1,1,1)
+        nC = len(channel_images)
+        shape = (nC,*tuple([1]*channel_images[0].ndim))
+        norm_tar = (channel_images - self.normalization_dict['mean_channel'].reshape(*shape))/self.normalization_dict['std_channel'].reshape(*shape)
         return norm_tar.astype(np.float32)
     
     def patch_count_per_frame(self):

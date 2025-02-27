@@ -282,10 +282,10 @@ if __name__ == "__main__":
     dummy_normalizer_flag = opt['datasets'].get('normalize_channels', False) is True
     # train the normalizers if we are not normalizing the channels.  
     if opt['datasets']['train']['name'] == 'goPro2017dehazing':
-        xt_normalizer1= get_xt_normalizer_restoration(train_set, opt['datasets']['train'], dummy=dummy_normalizer_flag,num_bins=100, num_steps=1000)
+        xt_normalizer1= get_xt_normalizer_restoration(train_set, opt['datasets']['train'], dummy=dummy_normalizer_flag,num_bins=100, num_steps=10000)
         xt_normalizer2 = None
     else:
-        xt_normalizer1, xt_normalizer2 = get_xt_normalizer(train_set, opt['datasets']['train'], dummy=dummy_normalizer_flag,num_bins=100, num_steps=1000)
+        xt_normalizer1, xt_normalizer2 = get_xt_normalizer(train_set, opt['datasets']['train'], dummy=dummy_normalizer_flag,num_bins=100, num_steps=10000)
 
     opt['model']['xt_normalizer_1'] = xt_normalizer1
     opt['model']['xt_normalizer_2'] = xt_normalizer2

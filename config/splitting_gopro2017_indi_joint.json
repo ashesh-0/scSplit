@@ -15,14 +15,14 @@
     },
     "datasets": {
         "upper_clip": false,
-        "patch_size": 512,
+        "patch_size": 128,
         "max_qval": 1.0,
-        "mix_target_max_factor": 0.5,
+        // "mix_target_max_factor": 0.5,
         "train": {
             "name": "goPro2017dehazing",
             "datapath": "/group/jug/ashesh/data/goproDeblurring2017/GOPRO_Large",
             "datatype": "img", //lmdb or img, path of img files
-            "batch_size": 8,
+            "batch_size": 64,
             "num_workers": 4,
             "use_shuffle": true,
             "uncorrelated_channels": false
@@ -30,7 +30,7 @@
         "val": {
             "name": "goPro2017dehazing",
             "datapath": "/group/jug/ashesh/data/goproDeblurring2017/GOPRO_Large",
-            "patch_size": 512,
+            "patch_size": 128,
             "datatype": "img" //lmdb or img, path of img files
         }
     },

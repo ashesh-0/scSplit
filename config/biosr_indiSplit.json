@@ -17,7 +17,7 @@
         "upper_clip": false,
         "patch_size": 512,
         "max_qval": 1.0,
-        "normalize_channels": false,
+        "normalize_channels": true,
         // "channel_weights": [1.0, 1.0],
         "train": {
             "name": "BioSR",

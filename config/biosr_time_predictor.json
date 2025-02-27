@@ -19,10 +19,8 @@
         "max_qval": 1.0,
         "channel_weights": [1.0, 1.0],
         "train": {
-            // "name": "COSEM_jrc-hela",
-            // "datapath": "/group/jug/ashesh/bleedthroughsimulation/jrc_hela-3/train_val_test_split/train_jrc_hela-3_bleedthrough_EGFP_Venus_R3.0-3.0_S4_D1_Ex100.0ms.tif",
-            "name": "COSEM_jrc-choroid-plexus-2",
-            "datapath": "/group/jug/ashesh/bleedthroughsimulation/jrc_choroid-plexus-2/train_val_test_split/train_jrc_choroid-plexus-2_bleedthrough_er_pred_endo_pred_EGFP_Venus_R3.0-3.0_S2_D1_Ex100.0ms.tif",
+            "name": "BioSR",
+            "datapath": "/group/jug/ashesh/data/diffsplit_BioSR/Microtubules-vs-ER/train/",
             "datatype": "img", //lmdb or img, path of img files
             "batch_size": 8,
             "num_workers": 4,
@@ -31,10 +29,8 @@
             "gaussian_noise_std_factor": 0.05
         },
         "val": {
-            // "name": "COSEM_jrc-hela",
-            // "datapath": "/group/jug/ashesh/bleedthroughsimulation/jrc_hela-3/train_val_test_split/val_jrc_hela-3_bleedthrough_EGFP_Venus_R3.0-3.0_S4_D1_Ex100.0ms.tif",
-            "name": "COSEM_jrc-choroid-plexus-2",
-            "datapath": "/group/jug/ashesh/bleedthroughsimulation/jrc_choroid-plexus-2/train_val_test_split/val_jrc_choroid-plexus-2_bleedthrough_er_pred_endo_pred_EGFP_Venus_R3.0-3.0_S2_D1_Ex100.0ms.tif",
+            "name": "BioSR",
+            "datapath": "/group/jug/ashesh/data/diffsplit_BioSR/Microtubules-vs-ER/val/",
             "patch_size": 512,
             "datatype": "img" //lmdb or img, path of img files
         }
@@ -45,7 +41,7 @@
         "finetune_norm": false,
         "which_model_G": "UnetClassifier",
         "scale_augmentation": false,
-        "scale_augmentation_delta": 0.15,
+        "scale_augmentation_delta": 0.05,
         "unet": {
             "in_channel": 1, // target channel + input channel. it is so because the noise of the shape target is concatenated with the input
             "out_channel": 1,

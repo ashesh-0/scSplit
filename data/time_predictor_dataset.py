@@ -55,7 +55,7 @@ class TimePredictorDataset(SplitDataset):
     
     def set_fixed_t(self, t_value:float):
         self._fixed_t = t_value
-        assert self._fixed_t >= 0 and self._fixed_t < 1, "Fixed t must be between 0 and 1"
+        assert self._fixed_t >= 0 and self._fixed_t <= 1, "Fixed t must be between 0 and 1"
 
     def sample_t(self):
         if self._fixed_t is not None:

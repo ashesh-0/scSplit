@@ -1,0 +1,156 @@
+Ckpt: 2502/BioSR-joint_indi-l1/5
+T:10000 W:0.2 RealInp:False M:10 TPred:False TPredAgg:False TPredFixed:0.1Norm:10000 InfSteps:10000
+
+BT Removed: PSNR:	 37.67+-0.303	31.53+-2.2
+BT Removed: MicroSSIM:	 0.957+-0.0030	0.777+-0.0210
+BT Removed: MicroS3IM:	 0.987+-0.0010	0.912+-0.0100
+BT Removed: SSIM:	 0.842+-0.0290	0.798+-0.0290
+BT Removed: MSSSIM:	 0.981+-0.0020	0.811+-0.0120
+BT Removed: lpips:	 0.012+-0.0010	0.151+-0.0160
+
+Weak Ch Pred: PSNR:	 22.21+-0.365	28.44+-1.116
+Weak Ch Pred: MicroSSIM:	 0.646+-0.0240	0.736+-0.0360
+Weak Ch Pred: MicroS3IM:	 0.744+-0.0140	0.879+-0.0100
+Weak Ch Pred: SSIM:	 0.558+-0.0250	0.845+-0.0150
+Weak Ch Pred: MSSSIM:	 0.694+-0.0090	0.888+-0.0110
+Weak Ch Pred: lpips:	 0.307+-0.0120	0.158+-0.0190
+
+
+Ckpt: 2502/BioSR-joint_indi-l1/5
+T:10000 W:0.2 RealInp:False M:10 TPred:False TPredAgg:False TPredFixed:0.2Norm:10000 InfSteps:10000
+
+BT Removed: PSNR:	 38.27+-0.35	34.02+-2.357
+BT Removed: MicroSSIM:	 0.966+-0.0020	0.817+-0.0250
+BT Removed: MicroS3IM:	 0.988+-0.0010	0.939+-0.0080
+BT Removed: SSIM:	 0.843+-0.0290	0.837+-0.0310
+BT Removed: MSSSIM:	 0.982+-0.0020	0.859+-0.0090
+BT Removed: lpips:	 0.011+-0.0010	0.103+-0.0090
+
+Weak Ch Pred: PSNR:	 22.94+-0.562	28.79+-0.908
+Weak Ch Pred: MicroSSIM:	 0.666+-0.0300	0.766+-0.0430
+Weak Ch Pred: MicroS3IM:	 0.785+-0.0130	0.901+-0.0090
+Weak Ch Pred: SSIM:	 0.567+-0.0270	0.863+-0.0100
+Weak Ch Pred: MSSSIM:	 0.708+-0.0120	0.915+-0.0080
+Weak Ch Pred: lpips:	 0.290+-0.0150	0.121+-0.0160
+
+Ckpt: 2502/BioSR-joint_indi-l1/5
+T:10000 W:0.2 RealInp:False M:10 TPred:False TPredAgg:False TPredFixed:0.3Norm:10000 InfSteps:10000
+
+BT Removed: PSNR:	 37.94+-0.401	35.95+-2.19
+BT Removed: MicroSSIM:	 0.969+-0.0020	0.849+-0.0280
+BT Removed: MicroS3IM:	 0.987+-0.0010	0.958+-0.0060
+BT Removed: SSIM:	 0.835+-0.0280	0.876+-0.0310
+BT Removed: MSSSIM:	 0.979+-0.0020	0.909+-0.0060
+BT Removed: lpips:	 0.013+-0.0010	0.070+-0.0060
+
+Weak Ch Pred: PSNR:	 23.82+-0.768	28.39+-0.788
+Weak Ch Pred: MicroSSIM:	 0.688+-0.0310	0.768+-0.0510
+Weak Ch Pred: MicroS3IM:	 0.821+-0.0180	0.903+-0.0080
+Weak Ch Pred: SSIM:	 0.581+-0.0290	0.828+-0.0060
+Weak Ch Pred: MSSSIM:	 0.725+-0.0140	0.873+-0.0100
+Weak Ch Pred: lpips:	 0.270+-0.0180	0.138+-0.0130
+
+Ckpt: 2502/BioSR-joint_indi-l1/5
+T:10000 W:0.2 RealInp:False M:10 TPred:False TPredAgg:False TPredFixed:0.4Norm:10000 InfSteps:10000
+
+BT Removed: PSNR:	 36.95+-0.471	37.68+-1.727
+BT Removed: MicroSSIM:	 0.968+-0.0020	0.869+-0.0310
+BT Removed: MicroS3IM:	 0.985+-0.0010	0.971+-0.0040
+BT Removed: SSIM:	 0.821+-0.0260	0.911+-0.0310
+BT Removed: MSSSIM:	 0.968+-0.0020	0.949+-0.0030
+BT Removed: lpips:	 0.020+-0.0020	0.045+-0.0040
+
+Weak Ch Pred: PSNR:	 24.76+-0.978	27.72+-0.713
+Weak Ch Pred: MicroSSIM:	 0.716+-0.0300	0.753+-0.0570
+Weak Ch Pred: MicroS3IM:	 0.847+-0.0200	0.895+-0.0080
+Weak Ch Pred: SSIM:	 0.598+-0.0300	0.790+-0.0070
+Weak Ch Pred: MSSSIM:	 0.743+-0.0150	0.823+-0.0150
+Weak Ch Pred: lpips:	 0.248+-0.0190	0.171+-0.0110
+
+
+Ckpt: 2502/BioSR-joint_indi-l1/5
+T:10000 W:0.2 RealInp:False M:10 TPred:False TPredAgg:False TPredFixed:0.5Norm:10000 InfSteps:10000
+
+BT Removed: PSNR:	 35.23+-0.543	39.17+-1.324
+BT Removed: MicroSSIM:	 0.959+-0.0030	0.880+-0.0340
+BT Removed: MicroS3IM:	 0.980+-0.0010	0.977+-0.0040
+BT Removed: SSIM:	 0.792+-0.0240	0.940+-0.0280
+BT Removed: MSSSIM:	 0.939+-0.0020	0.976+-0.0030
+BT Removed: lpips:	 0.040+-0.0030	0.027+-0.0030
+
+Weak Ch Pred: PSNR:	 25.89+-1.162	26.84+-0.671
+Weak Ch Pred: MicroSSIM:	 0.762+-0.0220	0.730+-0.0610
+Weak Ch Pred: MicroS3IM:	 0.875+-0.0150	0.877+-0.0080
+Weak Ch Pred: SSIM:	 0.625+-0.0290	0.758+-0.0100
+Weak Ch Pred: MSSSIM:	 0.774+-0.0120	0.784+-0.0180
+Weak Ch Pred: lpips:	 0.215+-0.0170	0.203+-0.0100
+
+
+Ckpt: 2502/BioSR-joint_indi-l1/5
+T:10000 W:0.2 RealInp:False M:10 TPred:False TPredAgg:False TPredFixed:0.6Norm:10000 InfSteps:10000
+
+BT Removed: PSNR:	 32.85+-0.554	40.43+-0.946
+BT Removed: MicroSSIM:	 0.933+-0.0020	0.887+-0.0340
+BT Removed: MicroS3IM:	 0.970+-0.0010	0.979+-0.0040
+BT Removed: SSIM:	 0.742+-0.0230	0.959+-0.0230
+BT Removed: MSSSIM:	 0.883+-0.0010	0.989+-0.0020
+BT Removed: lpips:	 0.076+-0.0060	0.016+-0.0020
+
+Weak Ch Pred: PSNR:	 27.3+-1.098	25.78+-0.702
+Weak Ch Pred: MicroSSIM:	 0.807+-0.0180	0.694+-0.0610
+Weak Ch Pred: MicroS3IM:	 0.902+-0.0080	0.846+-0.0090
+Weak Ch Pred: SSIM:	 0.668+-0.0280	0.730+-0.0140
+Weak Ch Pred: MSSSIM:	 0.823+-0.0090	0.756+-0.0210
+Weak Ch Pred: lpips:	 0.168+-0.0120	0.232+-0.0090
+
+Ckpt: 2502/BioSR-joint_indi-l1/5
+T:10000 W:0.2 RealInp:False M:10 TPred:False TPredAgg:False TPredFixed:0.7Norm:10000 InfSteps:10000
+
+BT Removed: PSNR:	 30.44+-0.509	41.18+-0.632
+BT Removed: MicroSSIM:	 0.878+-0.0070	0.893+-0.0320
+BT Removed: MicroS3IM:	 0.958+-0.0020	0.981+-0.0040
+BT Removed: SSIM:	 0.697+-0.0190	0.967+-0.0180
+BT Removed: MSSSIM:	 0.812+-0.0030	0.993+-0.0020
+BT Removed: lpips:	 0.120+-0.0070	0.012+-0.0020
+
+Weak Ch Pred: PSNR:	 29.41+-0.296	24.72+-0.786
+Weak Ch Pred: MicroSSIM:	 0.846+-0.0190	0.652+-0.0580
+Weak Ch Pred: MicroS3IM:	 0.927+-0.0110	0.811+-0.0090
+Weak Ch Pred: SSIM:	 0.726+-0.0280	0.707+-0.0160
+Weak Ch Pred: MSSSIM:	 0.888+-0.0100	0.737+-0.0210
+Weak Ch Pred: lpips:	 0.116+-0.0130	0.258+-0.0090
+
+
+Ckpt: 2502/BioSR-joint_indi-l1/5
+T:10000 W:0.2 RealInp:False M:10 TPred:False TPredAgg:False TPredFixed:0.8Norm:10000 InfSteps:10000
+
+BT Removed: PSNR:	 28.16+-0.363	41.42+-0.465
+BT Removed: MicroSSIM:	 0.802+-0.0170	0.901+-0.0300
+BT Removed: MicroS3IM:	 0.940+-0.0040	0.983+-0.0040
+BT Removed: SSIM:	 0.588+-0.0250	0.970+-0.0120
+BT Removed: MSSSIM:	 0.723+-0.0080	0.994+-0.0010
+BT Removed: lpips:	 0.173+-0.0090	0.010+-0.0020
+
+Weak Ch Pred: PSNR:	 29.03+-0.276	23.69+-0.872
+Weak Ch Pred: MicroSSIM:	 0.850+-0.0150	0.613+-0.0530
+Weak Ch Pred: MicroS3IM:	 0.925+-0.0100	0.774+-0.0100
+Weak Ch Pred: SSIM:	 0.759+-0.0290	0.682+-0.0180
+Weak Ch Pred: MSSSIM:	 0.925+-0.0100	0.721+-0.0190
+Weak Ch Pred: lpips:	 0.091+-0.0130	0.284+-0.0120
+
+Ckpt: 2502/BioSR-joint_indi-l1/5
+T:10000 W:0.2 RealInp:False M:10 TPred:False TPredAgg:False TPredFixed:0.9Norm:10000 InfSteps:10000
+
+BT Removed: PSNR:	 26.12+-0.314	40.77+-0.553
+BT Removed: MicroSSIM:	 0.738+-0.0240	0.903+-0.0290
+BT Removed: MicroS3IM:	 0.918+-0.0050	0.985+-0.0040
+BT Removed: SSIM:	 0.438+-0.0430	0.967+-0.0060
+BT Removed: MSSSIM:	 0.635+-0.0130	0.993+-0.0010
+BT Removed: lpips:	 0.222+-0.0110	0.011+-0.0020
+
+Weak Ch Pred: PSNR:	 27.43+-0.243	22.73+-0.975
+Weak Ch Pred: MicroSSIM:	 0.816+-0.0090	0.575+-0.0460
+Weak Ch Pred: MicroS3IM:	 0.902+-0.0080	0.727+-0.0110
+Weak Ch Pred: SSIM:	 0.709+-0.0270	0.647+-0.0190
+Weak Ch Pred: MSSSIM:	 0.864+-0.0090	0.699+-0.0170
+Weak Ch Pred: lpips:	 0.122+-0.0120	0.320+-0.0160

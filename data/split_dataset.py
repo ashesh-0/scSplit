@@ -31,8 +31,10 @@ def load_data(data_type, dataloc:DataLocation)->Dict[int, List[np.ndarray]]:
     else:
         assert data_type == "Hagen", "Only Hagen data is supported"
         if dataloc.fpath:
+            print('Loading data from', dataloc.fpath)
             return _load_data_fpath(dataloc.fpath)
         elif len(dataloc.channelwise_fpath) > 0:
+            print('Loading data from', dataloc.channelwise_fpath)
             return _load_data_channelwise_fpath_hagen(dataloc.channelwise_fpath)
 
 def compute_mean_stdev_based_normalization(data_dict, patch_size:int, numC:int, num_patches=10000):

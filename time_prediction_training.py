@@ -16,6 +16,7 @@ from core.logger import mkdirs
 import os
 from split import add_git_info
 from model.normalizer import NormalizerXT
+from predtiler.dataset import get_tiling_dataset, get_tile_manager
 
 def get_normalizer(dset, opt, num_pixels=500_000 * 128 * 128, return_data_arr=False):
     
@@ -96,7 +97,25 @@ def get_datasets(opt, tiled_pred=False):
     if not tiled_pred:
         class_obj = TimePredictorDataset 
     else:
-        raise NotImplementedError('Tiled prediction not implemented yet')
+        if data_type == 'Hagen':
+            data_shape = (10, 2048, 2048)
+        elif data_type in ['HT_LIF', 'HT_LIF24']:
+            data_shape = (10, 1608, 1608)
+        elif data_type == 'COSEM_jrc-hela':
+            data_shape = (96, 900, 1400)
+        elif data_type == 'COSEM_jrc-choroid-plexus-2':
+            data_shape = (96, 900, 1220)
+        elif data_type =='HT_T24':
+            data_shape = (36, 1608, 1608)
+        elif data_type == 'BioSR':
+            data_shape = (5, 1004, 1004)
+        else:
+            raise ValueError('Invalid data type')
+        
+        tile_manager = get_tile_manager(data_shape, (1, 64, 64), (1, patch_size, patch_size))
+
+        class_obj = get_tiling_dataset(TimePredictorDataset, tile_manager)
+        # raise NotImplementedError('Tiled prediction not implemented yet')
 
     val_set = class_obj(data_type, val_data_location, patch_size, target_channel_idx=target_channel_idx,
                            normalization_dict=train_set.get_input_target_normalization_dict(),

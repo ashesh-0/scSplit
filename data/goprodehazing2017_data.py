@@ -45,7 +45,7 @@ def load_data_dict(fpaths, limit_count=None):
         img = Image.open(sharp_fpath)
         sharp_imgs.append(np.array(img).transpose((2,0,1)))
         i +=1
-        if limit_count is not None and i > limit_count:
+        if limit_count is not None and i >= limit_count:
             break
         # if i > 20:
         #     break

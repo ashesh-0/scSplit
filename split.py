@@ -56,6 +56,9 @@ def get_datasets(opt, tiled_pred=False, eval_datasplit_type='val'):
     elif data_type == 'goPro2017dehazing':
         train_data_location = DataLocation(directory=(opt['datasets']['train']['datapath']), datasplit_type='train')
         val_data_location = DataLocation(directory=(opt['datasets']['val']['datapath']), datasplit_type=eval_datasplit_type)
+        train_data_location.limit_count = opt['datasets']['train'].get('limit_count', None)
+        val_data_location.limit_count = opt['datasets']['val'].get('limit_count', None)
+
         mix_target_max_factor = opt['datasets'].get('mix_target_max_factor', 0.0)
         train_set = RestorationDataset(data_type, train_data_location, patch_size, 
                                 target_channel_idx=target_channel_idx, 
@@ -72,8 +75,12 @@ def get_datasets(opt, tiled_pred=False, eval_datasplit_type='val'):
             class_obj = RestorationDataset 
         else:
             # TODO: for test vs val, we need a different data shape.
-            data_shape = (1111,  720, 1280)
-            tile_manager = get_tile_manager(data_shape, (1, patch_size//2, patch_size//2), (1,patch_size, patch_size))
+            if 'limit_count' in opt['datasets']['val'] and opt['datasets']['val']['limit_count'] is not None:
+                data_shape = (opt['datasets']['val']['limit_count'],  720, 1280)
+            else:
+                data_shape = (1111,  720, 1280)
+            
+            tile_manager = get_tile_manager(data_shape, (1, 720, 1280), (1,720, 1280))
             class_obj = get_tiling_dataset(RestorationDataset, tile_manager)
 
         val_set = class_obj(data_type, val_data_location, patch_size, target_channel_idx=target_channel_idx,

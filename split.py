@@ -41,7 +41,7 @@ def get_datasets(opt, tiled_pred=False, eval_datasplit_type='val'):
     data_type = opt['datasets']['train']['name']  
     uncorrelated_channels = opt['datasets']['train']['uncorrelated_channels']
     allowed_dsets = ['cifar10', 'Hagen', "RRW", "HT_LIF24", "COSEM_jrc-hela", "goPro2017dehazing", 
-                     "COSEM_jrc-choroid-plexus-2", "HT_T24","BioSR"]
+                     "COSEM_jrc-choroid-plexus-2", "HT_T24","BioSR", "PaviaATN"]
     assert data_type in allowed_dsets, f"Only one of {allowed_dsets} datasets are supported. Found {data_type}"
     if data_type == 'RRW':
         rootdir = opt['datasets']['datapath']

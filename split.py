@@ -106,7 +106,7 @@ def get_datasets(opt, tiled_pred=False, eval_datasplit_type='val'):
             val_data_location = DataLocation(channelwise_fpath=(opt['datasets']['val']['datapath']['ch0'],
                                                             opt['datasets']['val']['datapath']['ch1']))
         elif data_type in ['cifar10', 'HT_LIF24', 'COSEM_jrc-hela', 
-                           'COSEM_jrc-choroid-plexus-2', 'HT_T24', 'BioSR']:
+                           'COSEM_jrc-choroid-plexus-2', 'HT_T24', 'BioSR', 'PaviaATN']:
             train_data_location = DataLocation(directory=(opt['datasets']['train']['datapath']))
             val_data_location = DataLocation(directory=(opt['datasets']['val']['datapath']))
             extra_kwargs['input_channel_idx'] = opt['datasets']['input_channel_idx'] if 'input_channel_idx' in opt['datasets'] else None

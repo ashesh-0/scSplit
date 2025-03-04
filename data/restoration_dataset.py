@@ -15,7 +15,8 @@ class RestorationDataset(SplitDataset):
                  real_input_fraction=None,
                  upper_clip=False,
                  normalize_channels=True,
-                 mix_target_max_factor=0.5):
+                 mix_target_max_factor=0.0,
+                 fix_mixing_factor=None):
         super().__init__(data_type, data_location, patch_size, 
                  target_channel_idx=target_channel_idx,
                  input_channel_idx=input_channel_idx,
@@ -30,6 +31,11 @@ class RestorationDataset(SplitDataset):
                  upper_clip=upper_clip,
                  normalize_channels=normalize_channels)
         self._mix_target_max_factor = mix_target_max_factor
+        self._fix_mixing_factor = fix_mixing_factor
+        print(f'[{self.__class__.__name__}] RandomMixingFactor:{self._mix_target_max_factor} FixedMixingFactor:{self._fix_mixing_factor}')
+        if self._fix_mixing_factor is not None:
+            msg =f"mix_target_max_factor must be 0 when fix_mixing_factor is set. Current value: {self._mix_target_max_factor}"
+            assert self._mix_target_max_factor == 0.0 or self._mix_target_max_factor is None, msg
         # do we want to mix the target with the input to create the input?
         assert self._mix_target_max_factor >= 0 and self._mix_target_max_factor <= 1, "mix_target_max_factor must be between 0 and 1"
         if self._mix_target_max_factor > 0:
@@ -91,7 +97,11 @@ class RestorationDataset(SplitDataset):
 
         assert len(patch_arr) == 2, "Input & target must be a pair"
         output_dict = {'target': patch_arr[0], 'input': patch_arr[1]}
-        if self._mix_target_max_factor>0:
+        
+        if self._fix_mixing_factor is not None:
+            output_dict['input'] = output_dict['input'] * (1-self._fix_mixing_factor) + output_dict['target'] * self._fix_mixing_factor
+            output_dict['target_factor'] = self._fix_mixing_factor
+        elif self._mix_target_max_factor>0:
             factor = np.random.rand()*self._mix_target_max_factor
             output_dict['input'] = output_dict['input'] * (1-factor) + output_dict['target'] * factor
             output_dict['target_factor'] = factor

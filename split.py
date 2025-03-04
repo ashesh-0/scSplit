@@ -67,6 +67,7 @@ def get_datasets(opt, tiled_pred=False, eval_datasplit_type='val'):
                                     channel_weights=channel_weights,
                                 normalization_dict=None, enable_transforms=True,random_patching=True, 
                                 mix_target_max_factor=mix_target_max_factor,
+                                fix_mixing_factor=opt['datasets'].get('fix_mixing_factor', None),
                                 # input_from_normalized_target=input_from_normalized_target,
                                 # **extra_kwargs,
                                 # **train_kwargs
@@ -80,7 +81,7 @@ def get_datasets(opt, tiled_pred=False, eval_datasplit_type='val'):
             else:
                 data_shape = (1111,  720, 1280)
             
-            tile_manager = get_tile_manager(data_shape, (1, 720, 1280), (1,720, 1280))
+            tile_manager = get_tile_manager(data_shape, (1, patch_size//2, patch_size//2), (1, patch_size, patch_size))
             class_obj = get_tiling_dataset(RestorationDataset, tile_manager)
 
         val_set = class_obj(data_type, val_data_location, patch_size, target_channel_idx=target_channel_idx,
@@ -90,6 +91,7 @@ def get_datasets(opt, tiled_pred=False, eval_datasplit_type='val'):
                             channel_weights=channel_weights,
                             enable_transforms=False,
                             random_patching=False, 
+                            fix_mixing_factor=opt['datasets'].get('fix_mixing_factor', None),
                             # input_from_normalized_target=input_from_normalized_target,
                             # **val_kwargs,
                             # **extra_kwargs

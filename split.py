@@ -144,6 +144,8 @@ def get_datasets(opt, tiled_pred=False, eval_datasplit_type='val'):
                 data_shape = (36, 1608, 1608)
             elif data_type == 'BioSR':
                 data_shape = (5, 1004, 1004)
+            elif data_type == 'PaviaATN':
+                data_shape = (6,2720, 2720)
             
             tile_manager = get_tile_manager(data_shape, (1, patch_size//2, patch_size//2), (1, patch_size, patch_size))
 

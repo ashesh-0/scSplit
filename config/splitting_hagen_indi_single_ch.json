@@ -5,7 +5,7 @@
         0
     ],
     "path": { //set the path
-        "root": "/group/jug/ashesh/training/diffSplit/",
+        "root": "/group/jug/USERNAME/training/diffSplit/",
         "log": "logs",
         "tb_logger": "tb_logger",
         "results": "results",
@@ -23,8 +23,8 @@
             "name": "Hagen",
             // "target_channel_idx": 0, // If set then we do image translation from input to this channel 
             "datapath": {
-                "ch0": "/group/jug/ashesh/data/diffsplit_hagen/train/train_actin-60x-noise2-highsnr.tif",
-                "ch1": "/group/jug/ashesh/data/diffsplit_hagen/train/train_mito-60x-noise2-highsnr.tif"
+                "ch0": "/group/jug/USERNAME/data/diffsplit_hagen/train/train_actin-60x-noise2-highsnr.tif",
+                "ch1": "/group/jug/USERNAME/data/diffsplit_hagen/train/train_mito-60x-noise2-highsnr.tif"
             },
             "datatype": "img", //lmdb or img, path of img files
             "batch_size": 4,
@@ -36,8 +36,8 @@
             "name": "Hagen",
             // "target_channel_idx": 0, // If set then we do image translation from input to this channel 
             "datapath": {
-                "ch0": "/group/jug/ashesh/data/diffsplit_hagen/val/val_actin-60x-noise2-highsnr.tif",
-                "ch1": "/group/jug/ashesh/data/diffsplit_hagen/val/val_mito-60x-noise2-highsnr.tif"
+                "ch0": "/group/jug/USERNAME/data/diffsplit_hagen/val/val_actin-60x-noise2-highsnr.tif",
+                "ch1": "/group/jug/USERNAME/data/diffsplit_hagen/val/val_mito-60x-noise2-highsnr.tif"
             },
             "patch_size": 512,
             "datatype": "img" //lmdb or img, path of img files

@@ -5,7 +5,7 @@
         0
     ],
     "path": { //set the path
-        "root": "/group/jug/ashesh/training/diffSplit/",
+        "root": "/group/jug/USERNAME/training/diffSplit/",
         "log": "logs",
         "tb_logger": "tb_logger",
         "results": "results",
@@ -20,7 +20,7 @@
         "train": {
             "name": "cifar10",
             // "target_channel_idx": 0, // If set then we do image translation from input to this channel 
-            "datapath": "/group/jug/ashesh/data/cifar-10-python/train",
+            "datapath": "/group/jug/USERNAME/data/cifar-10-python/train",
             "datatype": "img", //lmdb or img, path of img files
             "batch_size": 16,
             "num_workers": 4,
@@ -30,7 +30,7 @@
         "val": {
             "name": "cifar10",
             "patch_size": 32,
-            "datapath": "/group/jug/ashesh/data/cifar-10-python/val",
+            "datapath": "/group/jug/USERNAME/data/cifar-10-python/val",
             "datatype": "img" //lmdb or img, path of img files
         }
     },

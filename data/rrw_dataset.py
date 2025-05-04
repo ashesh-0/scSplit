@@ -324,8 +324,8 @@ if __name__ == '__main__':
     #     print(inputs.size(),label.size(), img_name)
 
     print('-=-=-' * 20)
-    root = '/group/jug/ashesh/data/RRW/combined/RRWDatasets/'
-    root_txt = '/group/jug/ashesh/data/RRW/combined/RRWDatasets/DeRef_HZ2.txt'
+    root = '/group/jug/USERNAME/data/RRW/combined/RRWDatasets/'
+    root_txt = '/group/jug/USERNAME/data/RRW/combined/RRWDatasets/DeRef_HZ2.txt'
     # root_txt1 = 'D://Datasets//Reflection//Check_SIRR//real_train.txt'
 
     train_set_wTxt = my_dataset_wTxt(root, root_txt, crop_size=224, fix_sample_A=20, regular_aug=False)

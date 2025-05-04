@@ -6,11 +6,11 @@ import os
 
 
 if __name__ == '__main__':
-    # python notebooks/evaluate_notebook.py --ckpt=2502/HT_LIF24-joint_indi-l1/60 --mmse_count=10  --notebook=/home/ashesh.ashesh/code/DiffSplitting/notebooks/EvaluateJointIndiRealInput.ipynb --ckpt_time_predictor=2501/COSEM_jrc-hela-UnetClassifier-l2/6 --ckpt=2502/COSEM_jrc-hela-joint_indi-l1/33 --infer_time=true --use_aggregated_inferred_time=true
-    # python notebooks/evaluate_notebook.py --ckpt=2502/HT_LIF24-joint_indi-l1/60 --mmse_count=1 --mixing_t_ood=0.5 --notebook=/home/ashesh.ashesh/code/DiffSplitting/notebooks/EvaluateInputvsTarget.ipynb
+    # python notebooks/evaluate_notebook.py --ckpt=2502/HT_LIF24-joint_indi-l1/60 --mmse_count=10  --notebook=/home/USERNAME.USERNAME/code/DiffSplitting/notebooks/EvaluateJointIndiRealInput.ipynb --ckpt_time_predictor=2501/COSEM_jrc-hela-UnetClassifier-l2/6 --ckpt=2502/COSEM_jrc-hela-joint_indi-l1/33 --infer_time=true --use_aggregated_inferred_time=true
+    # python notebooks/evaluate_notebook.py --ckpt=2502/HT_LIF24-joint_indi-l1/60 --mmse_count=1 --mixing_t_ood=0.5 --notebook=/home/USERNAME.USERNAME/code/DiffSplitting/notebooks/EvaluateInputvsTarget.ipynb
     parser = argparse.ArgumentParser(description='Run a notebook')
-    parser.add_argument('--notebook', type=str, help='Notebook to run', default='/home/ashesh.ashesh/code/DiffSplitting/notebooks/EvaluateJointIndi.ipynb')
-    parser.add_argument('--outputdir', type=str, help='Output notebook directory', default='/group/jug/ashesh/indiSplit/notebook_results/')
+    parser.add_argument('--notebook', type=str, help='Notebook to run', default='/home/USERNAME.USERNAME/code/DiffSplitting/notebooks/EvaluateJointIndi.ipynb')
+    parser.add_argument('--outputdir', type=str, help='Output notebook directory', default='/group/jug/USERNAME/indiSplit/notebook_results/')
     # parser.add_argument('parameters', type=str, help='Parameters for the notebook')
     parser.add_argument('--ckpt', type=str, help='Checkpoint to use. eg. 2502/Hagen-joint_indi-l1/57')
     parser.add_argument('--num_steps_normalization', type=int, help='Number of epochs for normalization', default=10000)

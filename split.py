@@ -251,7 +251,7 @@ if __name__ == "__main__":
     parser.add_argument('-enable_wandb', action='store_true')
     parser.add_argument('-log_wandb_ckpt', action='store_true')
     parser.add_argument('-log_eval', action='store_true')
-    parser.add_argument('-rootdir', type=str, default='/group/jug/ashesh/training/diffsplit')
+    parser.add_argument('-rootdir', type=str, default='/group/jug/USERNAME/training/diffsplit')
     # parse configs
     args = parser.parse_args()
     opt = Logger.parse(args)

@@ -35,11 +35,11 @@ class SplitDatasetTiledPred(SplitDataset):
 
 if __name__ == "__main__":
     import sys
-    data_location = DataLocation(channelwise_fpath=('/group/jug/ashesh/data/diffsplit_hagen/val/val_actin-60x-noise2-highsnr.tif',
-                                                    '/group/jug/ashesh/data/diffsplit_hagen/val/val_mito-60x-noise2-highsnr.tif'))
+    data_location = DataLocation(channelwise_fpath=('/group/jug/USERNAME/data/diffsplit_hagen/val/val_actin-60x-noise2-highsnr.tif',
+                                                    '/group/jug/USERNAME/data/diffsplit_hagen/val/val_mito-60x-noise2-highsnr.tif'))
     # patch_size = 512
     # data_type = 'hagen'
-    # data_location = DataLocation(directory='/group/jug/ashesh/data/cifar-10-python/train')
+    # data_location = DataLocation(directory='/group/jug/USERNAME/data/cifar-10-python/train')
     patch_size = 256
     grid_size = 128
     data_type = 'Hagen'

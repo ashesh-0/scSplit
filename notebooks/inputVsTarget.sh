@@ -21,3 +21,10 @@ python notebooks/evaluate_notebook.py --ckpt=2502/Hagen-joint_indi-l1/63 --mmse_
 python notebooks/evaluate_notebook.py --ckpt=2502/Hagen-joint_indi-l1/63 --mmse_count=1 --mixing_t_ood=0.4 --notebook=/home/ashesh.ashesh/code/DiffSplitting/notebooks/EvaluateInputvsTarget.ipynb
 python notebooks/evaluate_notebook.py --ckpt=2502/Hagen-joint_indi-l1/63 --mmse_count=1 --mixing_t_ood=0.5 --notebook=/home/ashesh.ashesh/code/DiffSplitting/notebooks/EvaluateInputvsTarget.ipynb
 
+# PaviaATN
+python notebooks/evaluate_notebook.py --ckpt=2503/PaviaATN-joint_indi-l1/7 --mmse_count=1 --mixing_t_ood=0.1 --notebook=/home/ashesh.ashesh/code/DiffSplitting/notebooks/EvaluateInputvsTarget.ipynb
+python notebooks/evaluate_notebook.py --ckpt=2503/PaviaATN-joint_indi-l1/7 --mmse_count=1 --mixing_t_ood=0.2 --notebook=/home/ashesh.ashesh/code/DiffSplitting/notebooks/EvaluateInputvsTarget.ipynb
+python notebooks/evaluate_notebook.py --ckpt=2503/PaviaATN-joint_indi-l1/7 --mmse_count=1 --mixing_t_ood=0.3 --notebook=/home/ashesh.ashesh/code/DiffSplitting/notebooks/EvaluateInputvsTarget.ipynb
+python notebooks/evaluate_notebook.py --ckpt=2503/PaviaATN-joint_indi-l1/7 --mmse_count=1 --mixing_t_ood=0.4 --notebook=/home/ashesh.ashesh/code/DiffSplitting/notebooks/EvaluateInputvsTarget.ipynb
+python notebooks/evaluate_notebook.py --ckpt=2503/PaviaATN-joint_indi-l1/7 --mmse_count=1 --mixing_t_ood=0.5 --notebook=/home/ashesh.ashesh/code/DiffSplitting/notebooks/EvaluateInputvsTarget.ipynb
+

@@ -109,6 +109,6 @@ def save_train_val_test_split(outputdir, textfilesdir):
     print(f"Saved test data N:{testCounter} to {test_fpath}")
 
 if __name__ == '__main__':
-    outputdir = '/group/jug/USERNAME/data/RRW/combined/'
-    textfilesdir = '/group/jug/USERNAME/data/RRW/combined/RRWDatasets/'
+    outputdir = '/group/GROUPNAMEUSERNAME/data/RRW/combined/'
+    textfilesdir = '/group/GROUPNAMEUSERNAME/data/RRW/combined/RRWDatasets/'
     save_train_val_test_split(outputdir, textfilesdir)

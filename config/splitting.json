@@ -5,7 +5,7 @@
         0
     ],
     "path": { //set the path
-        "root": "/group/jug/USERNAME/training/diffSplit/",
+        "root": "/group/GROUPNAMEUSERNAME/training/diffSplit/",
         "log": "logs",
         "tb_logger": "tb_logger",
         "results": "results",
@@ -21,8 +21,8 @@
             "name": "Hagen",
             // "target_channel_idx": 0, // If set then we do image translation from input to this channel 
             "datapath": {
-                "ch0": "/group/jug/USERNAME/data/ventura_gigascience_small/actin-60x-noise2-highsnr.tif",
-                "ch1": "/group/jug/USERNAME/data/ventura_gigascience_small/mito-60x-noise2-highsnr.tif"
+                "ch0": "/group/GROUPNAMEUSERNAME/data/ventura_gigascience_small/actin-60x-noise2-highsnr.tif",
+                "ch1": "/group/GROUPNAMEUSERNAME/data/ventura_gigascience_small/mito-60x-noise2-highsnr.tif"
             },
             "datatype": "img", //lmdb or img, path of img files
             "batch_size": 4,
@@ -33,8 +33,8 @@
             "name": "Hagen",
             "patch_size": 512,
             "datapath": {
-                "ch0": "/group/jug/USERNAME/data/ventura_gigascience_small/actin-60x-noise2-highsnr.tif",
-                "ch1": "/group/jug/USERNAME/data/ventura_gigascience_small/mito-60x-noise2-highsnr.tif"
+                "ch0": "/group/GROUPNAMEUSERNAME/data/ventura_gigascience_small/actin-60x-noise2-highsnr.tif",
+                "ch1": "/group/GROUPNAMEUSERNAME/data/ventura_gigascience_small/mito-60x-noise2-highsnr.tif"
             },
             "datatype": "img" //lmdb or img, path of img files
         }

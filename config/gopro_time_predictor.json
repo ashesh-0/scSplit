@@ -5,7 +5,7 @@
         0
     ],
     "path": { //set the path
-        "root": "/group/jug/USERNAME/training/diffSplit/",
+        "root": "/group/GROUPNAMEUSERNAME/training/diffSplit/",
         "log": "logs",
         "tb_logger": "tb_logger",
         "results": "results",
@@ -22,7 +22,7 @@
         "train": {
             "name": "goPro2017dehazing",
             "limit_count": 20,
-            "datapath": "/group/jug/USERNAME/data/goproDeblurring2017/GOPRO_Large",
+            "datapath": "/group/GROUPNAMEUSERNAME/data/goproDeblurring2017/GOPRO_Large",
             "datatype": "img", //lmdb or img, path of img files
             "batch_size": 32,
             "num_workers": 4,
@@ -32,7 +32,7 @@
         },
         "val": {
             "name": "goPro2017dehazing",
-            "datapath": "/group/jug/USERNAME/data/goproDeblurring2017/GOPRO_Large",
+            "datapath": "/group/GROUPNAMEUSERNAME/data/goproDeblurring2017/GOPRO_Large",
             "limit_count": 10,
             "patch_size": 128,
             "datatype": "img" //lmdb or img, path of img files

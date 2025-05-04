@@ -48,7 +48,7 @@ if __name__ == '__main__':
     import numpy as np
     import matplotlib.pyplot as plt
 
-    datadir = '/group/jug/USERNAME/data/cifar-10-python/train'
+    datadir = '/group/GROUPNAMEUSERNAME/data/cifar-10-python/train'
     fpath = os.path.join(datadir, 'data_batch_1')
     imgs, labels = load_cifar10_data(fpath)
     labels = np.array(labels)

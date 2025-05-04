@@ -72,6 +72,6 @@ def get_train_val_test_data(datalocation:DataLocation):
 
 
 if __name__ == '__main__':
-    dataloc = DataLocation(directory='/group/jug/USERNAME/data/goproDeblurring2017/GOPRO_Large', datasplit_type='train')
+    dataloc = DataLocation(directory='/group/GROUPNAMEUSERNAME/data/goproDeblurring2017/GOPRO_Large', datasplit_type='train')
     data_dict = get_train_val_test_data(dataloc)
     breakpoint()

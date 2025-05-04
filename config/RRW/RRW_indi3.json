@@ -5,7 +5,7 @@
         0
     ],
     "path": { //set the path
-        "root": "/group/jug/USERNAME/training/diffSplit/",
+        "root": "/group/GROUPNAMEUSERNAME/training/diffSplit/",
         "log": "logs",
         "tb_logger": "tb_logger",
         "results": "results",
@@ -18,7 +18,7 @@
         "patch_size": 256,
         // "max_qval": 0.995,
         // "channel_weights": [1.0, 1.0],
-        "datapath": "/group/jug/USERNAME/data/RRW/combined/",
+        "datapath": "/group/GROUPNAMEUSERNAME/data/RRW/combined/",
         "max_images": 2000,
         "train": {
             "name": "RRW",

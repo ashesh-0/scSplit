@@ -116,11 +116,11 @@ class TimePredictorDataset(SplitDataset):
 if __name__ == "__main__":
     import sys
     import matplotlib.pyplot as plt 
-    data_location = DataLocation(channelwise_fpath=('/group/jug/USERNAME/data/diffsplit_hagen/val/val_actin-60x-noise2-highsnr.tif',
-                                                    '/group/jug/USERNAME/data/diffsplit_hagen/val/val_mito-60x-noise2-highsnr.tif'))
+    data_location = DataLocation(channelwise_fpath=('/group/GROUPNAMEUSERNAME/data/diffsplit_hagen/val/val_actin-60x-noise2-highsnr.tif',
+                                                    '/group/GROUPNAMEUSERNAME/data/diffsplit_hagen/val/val_mito-60x-noise2-highsnr.tif'))
     # patch_size = 512
     # data_type = 'hagen'
-    # data_location = DataLocation(directory='/group/jug/USERNAME/data/cifar-10-python/train')
+    # data_location = DataLocation(directory='/group/GROUPNAMEUSERNAME/data/cifar-10-python/train')
     patch_size = 256
     data_type = 'Hagen'
     nC = 1 if data_type == 'Hagen' else 3

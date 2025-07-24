@@ -157,6 +157,7 @@ def start_training(opt):
         res_blocks=model_opt['unet']['res_blocks'],
         dropout=model_opt['unet']['dropout'],
         image_size=opt['datasets']['patch_size'],
+        initial_instance_norm= model_opt['unet'].get('initial_instance_norm', False),
         **model_kwargs,
         )
     model = model.cuda()

@@ -131,6 +131,7 @@ def define_G(opt):
         res_blocks=model_opt['unet']['res_blocks'],
         dropout=model_opt['unet']['dropout'],
         image_size=model_opt['diffusion']['image_size'],
+        initial_instance_norm=model_opt['unet'].get('initial_instance_norm', False),
         )
         
     else:
@@ -145,6 +146,7 @@ def define_G(opt):
         res_blocks=model_opt['unet']['res_blocks'],
         dropout=model_opt['unet']['dropout'],
         image_size=model_opt['diffusion']['image_size'],
+        initial_instance_norm=model_opt['unet'].get('initial_instance_norm', False),
          )
         
         denoise_fn_ch2 = UNetDdpm(
@@ -157,6 +159,7 @@ def define_G(opt):
         res_blocks=model_opt['unet']['res_blocks'],
         dropout=model_opt['unet']['dropout'],
         image_size=model_opt['diffusion']['image_size'],
+        initial_instance_norm=model_opt['unet'].get('initial_instance_norm', False),
          )
         model_kwargs['denoise_fn_ch1'] = denoise_fn_ch1
         model_kwargs['denoise_fn_ch2'] = denoise_fn_ch2
@@ -174,6 +177,7 @@ def define_G(opt):
             res_blocks=model_opt['unet']['res_blocks'],
             dropout=model_opt['unet']['dropout'],
             image_size=model_opt['diffusion']['image_size'],
+            initial_instance_norm=model_opt['unet'].get('initial_instance_norm', False),
         )
         model_kwargs['time_predictor'] = time_predictor 
     
@@ -189,7 +193,6 @@ def define_G(opt):
         val_schedule_opt=model_opt['beta_schedule']['val'],
         **model_kwargs
         )
-
 
     
     if opt['phase'] == 'train':

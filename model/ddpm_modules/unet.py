@@ -65,7 +65,7 @@ class Block(nn.Module):
     def __init__(self, dim, dim_out, groups=32, dropout=0):
         super().__init__()
         self.block = nn.Sequential(
-            nn.GroupNorm(groups, dim),
+            nn.GroupNorm(groups if groups > 0 else dim, dim),
             Swish(),
             nn.Dropout(dropout) if dropout != 0 else nn.Identity(),
             nn.Conv2d(dim, dim_out, 3, padding=1)
@@ -102,7 +102,7 @@ class SelfAttention(nn.Module):
 
         self.n_head = n_head
 
-        self.norm = nn.GroupNorm(norm_groups, in_channel)
+        self.norm = nn.GroupNorm(norm_groups if norm_groups > 0 else in_channel, in_channel)
         self.qkv = nn.Conv2d(in_channel, in_channel * 3, 1, bias=False)
         self.out = nn.Conv2d(in_channel, in_channel, 1)
 
@@ -156,10 +156,11 @@ class UNet(nn.Module):
         res_blocks=3,
         dropout=0,
         with_time_emb=True,
-        image_size=128
+        image_size=128,
+        initial_instance_norm=False,
     ):
         super().__init__()
-
+        self.init_instance_norm = None if initial_instance_norm is False else nn.InstanceNorm2d(in_channel)
         if with_time_emb:
             time_dim = inner_channel
             self.time_mlp = nn.Sequential(
@@ -216,11 +217,14 @@ class UNet(nn.Module):
         self.ups = nn.ModuleList(ups)
 
         self.final_conv = Block(pre_channel, default(out_channel, in_channel), groups=norm_groups)
+        print(f'{[self.__class__.__name__]} with in_channel {in_channel}, out_channel {out_channel}, norm_groups {norm_groups}, image_size {image_size}, initial_instance_norm {self.init_instance_norm is not None}')
 
     def forward(self, x, time):
         t = self.time_mlp(time) if exists(self.time_mlp) else None
-
         feats = []
+        if self.init_instance_norm is not None:
+            x = self.init_instance_norm(x)
+        
         for layer in self.downs:
             if isinstance(layer, ResnetBlocWithAttn):
                 x = layer(x, t)

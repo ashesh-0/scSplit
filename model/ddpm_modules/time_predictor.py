@@ -21,6 +21,7 @@ class TimePredictor(nn.Module):
         image_size=128,
         scale_augmentation=False,
         scale_augmentation_delta=None,
+        initial_instance_norm=False,
         ):
         super().__init__()
         self.unet = UNet(in_channel=in_channel, 
@@ -32,7 +33,8 @@ class TimePredictor(nn.Module):
                             res_blocks=res_blocks,
                             dropout=dropout,
                             image_size=image_size,
-                         with_time_emb=False)
+                         with_time_emb=False,
+                         initial_instance_norm=initial_instance_norm)
 
         self.foreground_mask = ForegroundMask(in_channel, out_channel)
         self._scale_augmentation = scale_augmentation

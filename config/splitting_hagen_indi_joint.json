@@ -56,7 +56,7 @@
             "in_channel": 1, // target channel + input channel. it is so because the noise of the shape target is concatenated with the input
             "out_channel": 1,
             "inner_channel": 16,
-            "norm_groups": -1,
+            "norm_groups": 16,
             "initial_instance_norm": true, // if true then before anything, instance norm is applied. 
             "channel_multiplier": [
                 1,

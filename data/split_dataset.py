@@ -181,6 +181,8 @@ class SplitDataset:
         self._numC = len(self._data_dict.keys())
         for i in range(self._numC):
             assert i in self._data_dict, f"Channel {i} has no data"
+            assert isinstance(self._data_dict[i], list), f"Data for channel {i} is not a list"
+            self._data_dict[i] = [self._channel_weights[i] * x for x in self._data_dict[i]]
         
         self._frameN = min(len(self._data_dict[0]), len(self._data_dict[1]))
         self._target_channel_idx = target_channel_idx

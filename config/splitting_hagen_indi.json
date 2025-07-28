@@ -17,8 +17,8 @@
         "upper_clip": false,
         "patch_size": 512,
         "max_qval": 1.0,
-        "normalize_channels": true,
-        // "channel_weights": [1.0, 1.0],
+        "normalize_channels": false,
+        // "channel_weights": [4.0, 1.0],
         "train": {
             "name": "Hagen",
             "datapath": {
@@ -57,7 +57,7 @@
             "out_channel": 1,
             "inner_channel": 16,
             "norm_groups": 16,
-            "initial_instance_norm": true, // if true then before anything, instance norm is applied. 
+            "initial_instance_norm": false, // if true then before anything, instance norm is applied. 
             "channel_multiplier": [
                 1,
                 2,

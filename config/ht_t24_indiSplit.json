@@ -18,8 +18,8 @@
         "patch_size": 512,
         "max_qval": 1.0,
         "input_channel_idx": 2,
-        "normalize_channels": true,
-        // "channel_weights": [1.0, 1.0],
+        "normalize_channels": false,
+        "channel_weights": [1.0, 4.0, 1.0],
         "train": {
             "name": "HT_T24",
             "datapath": "/group/jug/ashesh/data/diffsplit_HT_T24/train/",

@@ -17,7 +17,7 @@ if __name__ == '__main__':
     parser.add_argument('--ckpt_time_predictor', type=str, help='Checkpoint for time predictor', default=None)
     parser.add_argument('--mixing_t_ood', type=float, help='Mixing parameter for input generation', default=0.5)
     parser.add_argument('--mmse_count', type=int, help='Number of mmse values to generate', default=10)
-    parser.add_argument('--num_timesteps', type=int, help='Number of timesteps to use', default=10000)
+    parser.add_argument('--num_timesteps', type=int, help='Number of timesteps to use', default=1)
     parser.add_argument('--enable_real_input', type=bool, help='Enable real input', default=False)
     parser.add_argument('--infer_time', type=bool, help='Infer time', default=False)
     parser.add_argument('--use_aggregated_inferred_time', type=bool, help='Use aggregated inferred time', default=False)

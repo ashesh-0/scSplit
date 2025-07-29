@@ -174,11 +174,11 @@ class SplitDataset:
         self._channel_weights = channel_weights
         self._input_from_normalized_target = input_from_normalized_target
         self._normalize_channels = normalize_channels
-        if self._channel_weights is None:
-            self._channel_weights = [1,1]
-        # channel_idx is the key. value is list of full sized frames.
         self._data_dict = self._load_data(data_type)
         self._numC = len(self._data_dict.keys())
+        if self._channel_weights is None:
+            self._channel_weights = [1] * self._numC
+        # channel_idx is the key. value is list of full sized frames.
         for i in range(self._numC):
             assert i in self._data_dict, f"Channel {i} has no data"
             assert isinstance(self._data_dict[i], list), f"Data for channel {i} is not a list"

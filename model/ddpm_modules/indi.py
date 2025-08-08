@@ -69,7 +69,7 @@ class InDI(GaussianDiffusion):
 
     @torch.no_grad()
     def inference_one_step(self, x_t, delta_t, t_cur):
-        assert delta_t <= t_cur, "delta_t should be less than or equal to t_cur."
+        assert delta_t <= t_cur, f"delta_t:{delta_t} should be less than or equal to t_cur:{t_cur}."
         t_cur = torch.Tensor([t_cur]).to(x_t.device)
         x_0 = self.denoise_fn(x_t, t_cur)
         noise = torch.randn_like(x_t) * self.get_t_times_e(t_cur-delta_t)

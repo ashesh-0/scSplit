@@ -28,12 +28,12 @@ Evaluation is done by running the notebooks. For some of the tasks, it can take 
 
 In this case the argument `--mixing_t_ood=0.5` fixes the desired mixing-ratio in the inputs.
 ```
-python notebooks/evaluate_notebook.py  --mmse_count=10  --notebook=/home/ashesh.ashesh/code/DiffSplitting/notebooks/EvaluateJointIndi.ipynb --ckpt=2502/BioSR-joint_indi-l1/5 --mixing_t_ood=0.5  --ckpt_time_predictor=2502/BioSR-UnetClassifier-l2/4 --outputdir=/group/jug/ashesh/indiSplit/notebook_results/
+python notebooks/evaluate_notebook.py  --mmse_count=10  --notebook=/home/ashesh.ashesh/code/DiffSplitting/notebooks/EvaluateJointIndi.ipynb --ckpt=2502/BioSR-joint_indi-l1/5 --mixing_t_ood=0.5  --ckpt_time_predictor=2502/BioSR-UnetClassifier-l2/4 --outputdir=/group/jug/ashesh/indiSplit/notebook_results/ --training_rootdir=PATH_TO_WHERE_ALL_MODELS_ARE_SAVED
 ```
 
 ### Directly Imaged Inputs
 ```
-python notebooks/evaluate_notebook.py --enable_real_input=true --ckpt=2502/HT_LIF24-joint_indi-l1/60 --mmse_count=10  --notebook=/home/ashesh.ashesh/code/DiffSplitting/notebooks/EvaluateJointIndiRealInput.ipynb --ckpt_time_predictor=2502/HT_LIF24-UnetClassifier-l2/3 
+python notebooks/evaluate_notebook.py --enable_real_input=true --ckpt=2502/HT_LIF24-joint_indi-l1/60 --mmse_count=10  --notebook=/home/ashesh.ashesh/code/DiffSplitting/notebooks/EvaluateJointIndiRealInput.ipynb --ckpt_time_predictor=2502/HT_LIF24-UnetClassifier-l2/3 --training_rootdir=PATH_TO_WHERE_ALL_MODELS_ARE_SAVED
 ```
 
 

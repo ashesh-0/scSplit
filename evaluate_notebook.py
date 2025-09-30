@@ -11,6 +11,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Run a notebook')
     parser.add_argument('--notebook', type=str, help='Notebook to run', default='/home/ashesh.ashesh/code/DiffSplitting/notebooks/EvaluateJointIndi.ipynb')
     parser.add_argument('--outputdir', type=str, help='Output notebook directory', default='/group/jug/ashesh/indiSplit/notebook_results/')
+    parser.add_argument('--training_rootdir', type=str, help='Training root directory', default=None)
     # parser.add_argument('parameters', type=str, help='Parameters for the notebook')
     parser.add_argument('--ckpt', type=str, help='Checkpoint to use. eg. 2502/Hagen-joint_indi-l1/57')
     parser.add_argument('--num_steps_normalization', type=int, help='Number of epochs for normalization', default=10000)
@@ -44,10 +45,7 @@ if __name__ == '__main__':
         f.write(str(args_dict))
 
     print(output_fpath, '\n', output_config_fpath)
-    pm.execute_notebook(
-        args.notebook,
-        output_fpath,
-        parameters = {
+    param_dict = {
             'ckpt': args.ckpt,
             'num_steps_normalization': args.num_steps_normalization,
             'ckpt_time_predictor': args.ckpt_time_predictor,
@@ -60,5 +58,12 @@ if __name__ == '__main__':
             'use_hardcoded_time_for_inference': args.use_hardcoded_time_for_inference,
             'input_channel_idx': args.input_channel_idx
         }
+    if args.training_rootdir is not None:
+        param_dict['training_rootdir'] = args.training_rootdir
+        
+    pm.execute_notebook(
+        args.notebook,
+        output_fpath,
+        parameters = param_dict
     )
     

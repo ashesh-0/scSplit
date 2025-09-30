@@ -19,8 +19,8 @@ if __name__ == '__main__':
     parser.add_argument('--mmse_count', type=int, help='Number of mmse values to generate', default=10)
     parser.add_argument('--num_timesteps', type=int, help='Number of timesteps to use', default=1)
     parser.add_argument('--enable_real_input', type=bool, help='Enable real input', default=False)
-    parser.add_argument('--infer_time', type=bool, help='Infer time', default=False)
-    parser.add_argument('--use_aggregated_inferred_time', type=bool, help='Use aggregated inferred time', default=False)
+    parser.add_argument('--infer_time', type=bool, help='Infer time', default=True)
+    parser.add_argument('--use_aggregated_inferred_time', type=bool, help='Use aggregated inferred time', default=True)
     parser.add_argument('--use_hardcoded_time_for_inference', type=float, help='Use hardcoded time for inference', default=None)
     parser.add_argument('--input_channel_idx', type=int, help='Input channel index', default=2)
 

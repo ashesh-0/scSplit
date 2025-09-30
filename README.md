@@ -4,6 +4,12 @@
 
 This is the official implementation of **scSplit: Bringing Severity Cognizance to Image Decomposition in Fluorescence Microscopy**, published at NeurIPS 2025. [Paper link](https://arxiv.org/abs/2503.22983).
 
+## Installation
+1. Install [mamba](https://github.com/mamba-org/mamba)
+2. Execute installation.sh
+
+After installation, one needs to do `mamba activate split_hpc` to activate the environment and one can subsequently start to train or evaluate the models. 
+
 ## Training
 ### For $Gen_i$ networks
 ```

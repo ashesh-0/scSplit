@@ -51,3 +51,10 @@ The publicly available datasets were utilized in our study. We adopted the same 
 - [HTT24](TODO)
 - [HTLIF24](TODO)
 - [PaviaATN](TODO)
+
+## For evaluating other scSplit variants. 
+In addition to evaluating scSplit, the same checkpoints can be used to evaluate other scSplit variants mentioned in the paper. One needs to make following changes to the arguments while evaluating the notebooks: 
+
+- For $\text{scSplit}_{0.5}$, provide `--infer_time=False --use_aggregated_inferred_time=False --use_hardcoded_time_for_inference=0.5` and donot provide `ckpt_time_predictor`. 
+- For $\text{scSplit}_{-agg}$, provide ` --use_aggregated_inferred_time=False`.
+`

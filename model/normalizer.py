@@ -49,13 +49,24 @@ class NormalizerXT(nn.Module):
             )
             self.count[t_bin] += 1
 
+    def get_mean_std(self, t: torch.Tensor):
+        t_bins = (t * self.num_bins).type(torch.long)
+        t_bins[t_bins == self.num_bins] = self.num_bins - 1
+        mean_val = self.data_mean[t_bins]
+        std_val = self.data_std[t_bins]
+        return mean_val, std_val
+
     def normalize(self, x_t, t, update=False):
         if update and torch.sum(self.count) < self.stop_update_count:
             self.update(x_t, t)
 
         param_shape = [len(x_t)] + [1] * (len(x_t.shape) - 1)
-        t_bins = (t * self.num_bins).type(torch.long)
-        t_bins[t_bins == self.num_bins] = self.num_bins - 1
-        mean_val = self.data_mean[t_bins].reshape(param_shape).to(x_t.device)
-        std_val = self.data_std[t_bins].reshape(param_shape).to(x_t.device)
+        # t_bins = (t * self.num_bins).type(torch.long)
+        # t_bins[t_bins == self.num_bins] = self.num_bins - 1
+        # mean_val = self.data_mean[t_bins].reshape(param_shape).to(x_t.device)
+        # std_val = self.data_std[t_bins].reshape(param_shape).to(x_t.device)
+        mean_val, std_val = self.get_mean_std(t)
+        mean_val = mean_val.reshape(param_shape).to(x_t.device)
+        std_val = std_val.reshape(param_shape).to(x_t.device)
+        # print(x_t.shape, mean_val.shape, std_val.shape, mean_val.squeeze(), std_val.squeeze())
         return (x_t - mean_val) / std_val

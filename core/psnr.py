@@ -3,6 +3,7 @@ Computes PSNR of a batch of monochrome images.
 NOTE that a numpy version and torch.Tensor version have slightly different values.
 e9b29ba0b21f3b5fbd0f915309dcd18ecfee0f55
 """
+
 import numpy as np
 import torch
 
@@ -51,16 +52,16 @@ def _PSNR_internal(gt, pred, range_=None):
 
 @allow_numpy
 def PSNR(gt, pred, range_=None):
-    '''
-        Compute PSNR.
-        Parameters
-        ----------
-        gt: array
-            Ground truth image.
-        pred: array
-            Predicted image.
-    '''
-    assert len(gt.shape) == 3, 'Images must be in shape: (batch,H,W)'
+    """
+    Compute PSNR.
+    Parameters
+    ----------
+    gt: array
+        Ground truth image.
+    pred: array
+        Predicted image.
+    """
+    assert len(gt.shape) == 3, "Images must be in shape: (batch,H,W)"
 
     gt = gt.view(len(gt), -1)
     pred = pred.view(len(gt), -1)
@@ -74,7 +75,10 @@ def RangeInvariantPsnr(gt, pred):
     Adapted from https://github.com/juglab/ScaleInvPSNR/blob/master/psnr.py
     It rescales the prediction to ensure that the prediction has the same range as the ground truth.
     """
-    assert len(gt.shape) == 3, 'Images must be in shape: (batch,H,W)'
+    if len(gt.shape) == 2:
+        gt = gt[None]
+        pred = pred[None]
+
     gt = gt.view(len(gt), -1)
     pred = pred.view(len(gt), -1)
     ra = (torch.max(gt, dim=1).values - torch.min(gt, dim=1).values) / torch.std(gt, dim=1)

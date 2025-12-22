@@ -30,7 +30,7 @@ if __name__ == "__main__":
     )
 
     parser.add_argument("--data_split_type", type=str, help="Data split type: Val/Test", default="Test")
-    parser.add_argument("--tag_time_flag", type=bool, help="Tag time flag", default=False)
+    parser.add_argument("--tag_date", action="store_true", help="Tag time flag", default=False)
     parser.add_argument(
         "--override_kwargs",
         type=json.loads,
@@ -48,33 +48,40 @@ if __name__ == "__main__":
     outputdir = os.path.join(args.outputdir, model_token)
     fname = os.path.basename(args.notebook)
     fname = fname.replace(".ipynb", "")
-    if args.tag_time_flag:
-        now = datetime.now().strftime("%Y%m%d.%H.%M")
-        fname = f"{fname}_{param_str}_{now}.ipynb"
-    else:
-        fname = f"{fname}_{param_str}.ipynb"
+    fname = f"{fname}_{param_str}"
 
     param_dict["ckpt_dir"] = args.ckpt_dir
     param_dict["ckpt_time_predictor"] = args.ckpt_time_predictor
     param_dict["training_rootdir"] = args.training_rootdir
-    output_fpath = os.path.join(outputdir, fname)
-    output_config_fpath = os.path.join(outputdir, "config", fname.replace(".ipynb", ".txt"))
-    output_results_fpath = os.path.join(outputdir, "results", fname.replace(".ipynb", ".pkl"))
-    os.makedirs(os.path.dirname(output_config_fpath), exist_ok=True)
-    os.makedirs(os.path.dirname(output_results_fpath), exist_ok=True)
+    output_configdir = os.path.join(outputdir, "config")
+    output_resultsdir = os.path.join(outputdir, "results")
+    # output_config_fpath = os.path.join(outputdir, "config", fname.replace(".ipynb", ".txt"))
+    # output_results_fpath = os.path.join(outputdir, "results", fname.replace(".ipynb", ".pkl"))
+    os.makedirs(output_configdir, exist_ok=True)
+    os.makedirs(output_resultsdir, exist_ok=True)
     # save the configuration
     # convert args to dict
     args_dict = vars(args)
-    # save as json
-    with open(output_config_fpath, "w") as f:
-        f.write(str(args_dict))
 
+    output_results_fpath = os.path.join(output_resultsdir, fname + ".pkl")
     if args.data_split_type == "Test":
         calibration_params_fpath = output_results_fpath.replace("_Test_", "_Val_").replace("_Test.", "_Val.")
         assert os.path.exists(calibration_params_fpath), f"Calibration params not found: {calibration_params_fpath}"
         param_dict["calibration_params_fpath"] = calibration_params_fpath
         print("Calibration Params:", calibration_params_fpath)
         output_results_fpath = None
+
+    if args.tag_date:
+        now = datetime.now().strftime("%Y%m%d")
+        fname += f"_{now}.ipynb"
+    else:
+        fname += ".ipynb"
+    output_fpath = os.path.join(outputdir, fname)
+
+    # save as json
+    output_config_fpath = os.path.join(output_configdir, fname.replace(".ipynb", ".txt"))
+    with open(output_config_fpath, "w") as f:
+        f.write(str(args_dict))
 
     param_dict["eval_datasplit_type"] = args.data_split_type
     param_dict["notebook_output_fpath"] = output_results_fpath

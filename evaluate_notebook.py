@@ -29,7 +29,7 @@ if __name__ == "__main__":
         help="Checkpoint to use. eg. 2502/Hagen-UnetClassifier-l2/11",
     )
 
-    parser.add_argument("--data_split_type", type=str, help="Data split type: val/test", default="test")
+    parser.add_argument("--data_split_type", type=str, help="Data split type: Val/Test", default="Test")
     parser.add_argument("--tag_time_flag", type=bool, help="Tag time flag", default=False)
     parser.add_argument(
         "--override_kwargs",
@@ -37,7 +37,7 @@ if __name__ == "__main__":
         default="{}",
     )
     args = parser.parse_args()
-    assert args.data_split_type in ["val", "test"]
+    assert args.data_split_type in ["Val", "Test"]
 
     param_dict = args.override_kwargs
     keys = sorted(param_dict.keys())
@@ -71,9 +71,9 @@ if __name__ == "__main__":
 
     if args.data_split_type == "Test":
         calibration_params_fpath = output_results_fpath.replace("_Test_", "_Val_").replace("_Test.", "_Val.")
-        if os.path.exists(calibration_params_fpath):
-            param_dict["calibration_params_fpath"] = calibration_params_fpath
-            print("Calibration Params:", calibration_params_fpath)
+        assert os.path.exists(calibration_params_fpath), f"Calibration params not found: {calibration_params_fpath}"
+        param_dict["calibration_params_fpath"] = calibration_params_fpath
+        print("Calibration Params:", calibration_params_fpath)
         output_results_fpath = None
 
     param_dict["eval_datasplit_type"] = args.data_split_type

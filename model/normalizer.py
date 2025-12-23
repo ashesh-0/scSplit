@@ -57,6 +57,9 @@ class NormalizerXT(nn.Module):
         return mean_val, std_val
 
     def normalize(self, x_t, t, update=False):
+        """
+        The first dimension of x_t is assumed to be the batch dimension.
+        """
         if update and torch.sum(self.count) < self.stop_update_count:
             self.update(x_t, t)
 

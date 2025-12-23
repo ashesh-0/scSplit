@@ -19,13 +19,25 @@ class EvaluationSyntheticDset:
     def __len__(self):
         return len(self.dset)
 
+    def create_input(self, target, mixing_ratio):
+        if len(target.shape) == 3:
+            inp = target[:1] * (1 - mixing_ratio) + target[1:2] * mixing_ratio
+            inp = inp[None]
+            norm_inp = self.normalizer.normalize(torch.Tensor(inp), torch.Tensor([mixing_ratio]), update=False)
+            norm_inp = norm_inp[0]
+        else:
+            assert len(target.shape) == 4  # B,C,H,W
+            inp = target[:, :1] * (1 - mixing_ratio) + target[:, 1:2] * mixing_ratio
+            norm_inp = self.normalizer.normalize(
+                torch.Tensor(inp), torch.Tensor([mixing_ratio] * len(inp)), update=False
+            )
+
+        return norm_inp
+
     def __getitem__(self, index):
         data = self.dset[index]
-        inp_indi1 = data["target"][:1] * (1 - self.mixing_ratio) + data["target"][1:2] * self.mixing_ratio
-        norm_inp1 = self.normalizer.normalize(
-            torch.Tensor(inp_indi1), torch.Tensor([self.mixing_ratio] * len(inp_indi1)), update=False
-        )
         tar = torch.Tensor(data["target"])
         # normalize tar
         tar = self.normalizer.normalize(tar, torch.Tensor([0, 1.0]), update=False)
-        return norm_inp1, tar
+        inp = self.create_input(data["target"], self.mixing_ratio)
+        return inp, tar

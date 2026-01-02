@@ -218,7 +218,7 @@ def get_datasets(opt, tiled_pred=False, eval_datasplit_type="val"):
 
 
 def get_real_input_normalizer(train_set, train_opt, num_steps=1, dummy=False):
-    xt_normalizer1 = NormalizerXT(num_bins=1)
+    xt_normalizer1 = NormalizerXT(num_bins=1, device="cuda")
     if dummy:
         print("--------Dummy Normalizer Activated--------")
         return None, None  # xt_normalizer1, xt_normalizer2

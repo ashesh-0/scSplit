@@ -2,18 +2,22 @@ import torch
 
 
 class EvaluationSyntheticDset:
-    def __init__(self, dset, mixing_ratio, normalizer):
+    def __init__(self, dset, mixing_ratio, normalizer, real_input=False):
         self.dset = dset
         self.mixing_ratio = mixing_ratio
         self.normalizer = normalizer
         self.normalizer.set_device("cpu")
+        self._real_input = real_input
 
         # needed for tiling
         self.tile_manager = self.dset.tile_manager
 
     def get_mean_std_for_input(self):
         # for poisson noisee handler, we need this function.
-        mean, std = self.normalizer.get_mean_std(torch.Tensor([self.mixing_ratio]))
+        if self._real_input:
+            mean, std = self.normalizer.get_mean_std(torch.Tensor([0.955]))
+        else:
+            mean, std = self.normalizer.get_mean_std(torch.Tensor([self.mixing_ratio]))
         return mean, std
 
     def __len__(self):
@@ -39,5 +43,10 @@ class EvaluationSyntheticDset:
         tar = torch.Tensor(data["target"])
         # normalize tar
         tar = self.normalizer.normalize(tar, torch.Tensor([0, 1.0]), update=False)
-        inp = self.create_input(data["target"], self.mixing_ratio)
+        if self._real_input:
+            inp = torch.Tensor(data["input"])
+            # any t works since it has same stats for each t, for real input
+            inp = self.normalizer.normalize(inp, torch.Tensor([0.955]), update=False)
+        else:
+            inp = self.create_input(data["target"], self.mixing_ratio)
         return inp, tar
